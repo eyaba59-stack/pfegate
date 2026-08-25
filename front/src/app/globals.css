@@ -207,4 +207,17 @@
   ::-webkit-scrollbar-thumb:hover {
     background: #c6c6cd;
   }
+
+  /* Leaflet z-index fixes for Next.js */
+  .leaflet-container {
+    z-index: 0;
+  }
+
+  .leaflet-control-zoom {
+    z-index: 1000 !important;
+  }
+
+  .leaflet-popup-pane {
+    z-index: 1000 !important;
+  }
 }

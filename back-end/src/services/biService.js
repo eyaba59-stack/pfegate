@@ -350,6 +350,8 @@ export async function computeDestinationAnalysis(date) {
         flightsCount: r.flights,
         avgLoadFactor: loadFactor,
         onTimeRate,
+        lat: dest?.lat ?? 0,
+        lng: dest?.lng ?? 0,
       };
     })
   );

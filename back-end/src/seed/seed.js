@@ -73,6 +73,8 @@ export async function runSeed(days = DAYS) {
           avgLoadFactor: row.avgLoadFactor,
           onTimeRate: row.onTimeRate,
           barColor: row.barColor,
+          lat: meta?.lat ?? 0,
+          lng: meta?.lng ?? 0,
         },
       },
       { upsert: true }
@@ -88,6 +90,8 @@ export async function runSeed(days = DAYS) {
           city: d.city,
           country: d.country,
           region: d.region,
+          lat: d.lat,
+          lng: d.lng,
           rank: 99,
           passengers: 0,
           sharePercent: 0,

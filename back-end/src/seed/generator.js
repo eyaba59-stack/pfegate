@@ -15,22 +15,22 @@ export const AIRLINES = [
 ];
 
 export const DESTINATIONS = [
-  { code: "CDG", city: "Paris", country: "France", region: "Europe Ouest" },
-  { code: "LYS", city: "Lyon", country: "France", region: "Europe Ouest" },
-  { code: "MRS", city: "Marseille", country: "France", region: "Europe Ouest" },
-  { code: "NCE", city: "Nice", country: "France", region: "Europe Ouest" },
-  { code: "NTE", city: "Nantes", country: "France", region: "Europe Ouest" },
-  { code: "TLS", city: "Toulouse", country: "France", region: "Europe Ouest" },
-  { code: "BOD", city: "Bordeaux", country: "France", region: "Europe Ouest" },
-  { code: "BRU", city: "Brussels", country: "Belgique", region: "Europe Ouest" },
-  { code: "FRA", city: "Frankfurt", country: "Allemagne", region: "Europe Ouest" },
-  { code: "DUS", city: "Düsseldorf", country: "Allemagne", region: "Europe Ouest" },
-  { code: "MXP", city: "Milan", country: "Italie", region: "Europe Ouest" },
-  { code: "GVA", city: "Genève", country: "Suisse", region: "Europe Ouest" },
-  { code: "IST", city: "Istanbul", country: "Turquie", region: "Europe Est" },
-  { code: "CAI", city: "Le Caire", country: "Égypte", region: "Afrique Nord" },
-  { code: "DXB", city: "Dubaï", country: "Émirats", region: "Moyen-Orient" },
-  { code: "DOH", city: "Doha", country: "Qatar", region: "Moyen-Orient" },
+  { code: "CDG", city: "Paris", country: "France", region: "Europe Ouest", lat: 49.0097, lng: 2.5479 },
+  { code: "LYS", city: "Lyon", country: "France", region: "Europe Ouest", lat: 45.7256, lng: 5.0811 },
+  { code: "MRS", city: "Marseille", country: "France", region: "Europe Ouest", lat: 43.4393, lng: 5.2214 },
+  { code: "NCE", city: "Nice", country: "France", region: "Europe Ouest", lat: 43.6584, lng: 7.2159 },
+  { code: "NTE", city: "Nantes", country: "France", region: "Europe Ouest", lat: 47.1532, lng: -1.6108 },
+  { code: "TLS", city: "Toulouse", country: "France", region: "Europe Ouest", lat: 43.6293, lng: 1.3678 },
+  { code: "BOD", city: "Bordeaux", country: "France", region: "Europe Ouest", lat: 44.8283, lng: -0.7156 },
+  { code: "BRU", city: "Brussels", country: "Belgique", region: "Europe Ouest", lat: 50.9014, lng: 4.4844 },
+  { code: "FRA", city: "Frankfurt", country: "Allemagne", region: "Europe Ouest", lat: 50.0379, lng: 8.5622 },
+  { code: "DUS", city: "Düsseldorf", country: "Allemagne", region: "Europe Ouest", lat: 51.2895, lng: 6.7668 },
+  { code: "MXP", city: "Milan", country: "Italie", region: "Europe Ouest", lat: 45.6306, lng: 8.7281 },
+  { code: "GVA", city: "Genève", country: "Suisse", region: "Europe Ouest", lat: 46.2381, lng: 6.1090 },
+  { code: "IST", city: "Istanbul", country: "Turquie", region: "Europe Est", lat: 41.2753, lng: 28.7519 },
+  { code: "CAI", city: "Le Caire", country: "Égypte", region: "Afrique Nord", lat: 30.1219, lng: 31.4056 },
+  { code: "DXB", city: "Dubaï", country: "Émirats", region: "Moyen-Orient", lat: 25.2532, lng: 55.3657 },
+  { code: "DOH", city: "Doha", country: "Qatar", region: "Moyen-Orient", lat: 25.2731, lng: 51.6082 },
 ];
 
 const AIRCRAFT = [

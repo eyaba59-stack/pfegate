@@ -19,4 +19,11 @@ export class ApiDestinationRepository implements DestinationRepository {
     });
     return res.trafficByRegion;
   }
+
+  async getAllDestinations(): Promise<Destination[]> {
+    const res = await safe<{ destinations: Destination[] }>("/api/destinations", {
+      destinations: TOP_DESTINATIONS,
+    });
+    return res.destinations;
+  }
 }

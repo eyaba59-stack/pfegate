@@ -10,6 +10,8 @@ export interface Destination {
   passengers: number;
   sharePercent: number;
   barColor: string;
+  lat: number;
+  lng: number;
 }
 
 export interface RegionTraffic {

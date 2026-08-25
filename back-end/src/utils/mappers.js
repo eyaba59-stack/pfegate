@@ -66,6 +66,8 @@ export function mapDestination(d) {
     passengers: d.passengers,
     sharePercent: d.sharePercent,
     barColor: d.barColor,
+    lat: d.lat,
+    lng: d.lng,
   };
 }
 

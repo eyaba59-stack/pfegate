@@ -10,4 +10,8 @@ export class MockDestinationRepository implements DestinationRepository {
   async getTrafficByRegion(_date?: string): Promise<RegionTraffic[]> {
     return REGION_TRAFFIC;
   }
+
+  async getAllDestinations(): Promise<Destination[]> {
+    return TOP_DESTINATIONS;
+  }
 }

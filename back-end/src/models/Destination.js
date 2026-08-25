@@ -13,6 +13,8 @@ const destinationSchema = new mongoose.Schema(
     avgLoadFactor: { type: Number, default: 0 },
     onTimeRate: { type: Number, default: 0 },
     barColor: { type: String, default: "bg-secondary" },
+    lat: { type: Number, default: 0 },
+    lng: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

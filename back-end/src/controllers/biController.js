@@ -67,6 +67,8 @@ export const destinationDimension = asyncHandler(async (_req, res) => {
       passengers: d.passengers,
       flightsCount: d.flightsCount,
       onTimeRate: d.onTimeRate,
+      lat: d.lat,
+      lng: d.lng,
     })),
   });
 });

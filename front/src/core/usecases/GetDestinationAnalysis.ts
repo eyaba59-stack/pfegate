@@ -4,6 +4,7 @@ import type { DestinationRepository } from "@/core/domain/repositories/Destinati
 export interface DestinationAnalysis {
   topDestinations: Destination[];
   trafficByRegion: RegionTraffic[];
+  allDestinations: Destination[];
 }
 
 /**
@@ -13,10 +14,11 @@ export class GetDestinationAnalysis {
   constructor(private readonly destinationRepository: DestinationRepository) {}
 
   async execute(date?: string): Promise<DestinationAnalysis> {
-    const [topDestinations, trafficByRegion] = await Promise.all([
+    const [topDestinations, trafficByRegion, allDestinations] = await Promise.all([
       this.destinationRepository.getTopDestinations(date),
       this.destinationRepository.getTrafficByRegion(date),
+      this.destinationRepository.getAllDestinations(),
     ]);
-    return { topDestinations, trafficByRegion };
+    return { topDestinations, trafficByRegion, allDestinations };
   }
 }
