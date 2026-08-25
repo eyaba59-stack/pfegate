@@ -97,11 +97,12 @@ export default function LeafletMap({ destinations, selected, onSelect }: Leaflet
     const bounds = L.latLngBounds([[MONASTIR.lat, MONASTIR.lng]]);
 
     destinations.forEach((d) => {
-      const pos = L.latLng(d.lat, d.lng);
-      bounds.extend(pos);
+      if (!d.lat || !d.lng) return;
+
+      bounds.extend([d.lat, d.lng]);
 
       const polyline = L.polyline(
-        [pos, L.latLng(MONASTIR.lat, MONASTIR.lng)],
+        [[d.lat, d.lng], [MONASTIR.lat, MONASTIR.lng]],
         {
           color: "#40c2fd",
           weight: 1.5,
@@ -112,7 +113,7 @@ export default function LeafletMap({ destinations, selected, onSelect }: Leaflet
       polyline.on("click", () => onSelect(d.code));
       polylinesRef.current.set(`poly-${d.code}`, polyline);
 
-      const marker = L.marker(pos, { icon: makeMarkerIcon(false) }).addTo(map);
+      const marker = L.marker([d.lat, d.lng], { icon: makeMarkerIcon(false) }).addTo(map);
       marker.bindPopup(`
         <div style="text-align:center">
           <strong>${d.city} (${d.code})</strong><br/>
@@ -124,7 +125,7 @@ export default function LeafletMap({ destinations, selected, onSelect }: Leaflet
       markersRef.current.set(d.code, marker);
     });
 
-    if (destinations.length === 1) {
+    if (destinations.length === 1 && destinations[0].lat && destinations[0].lng) {
       map.setView([destinations[0].lat, destinations[0].lng], 6);
     } else {
       map.fitBounds(bounds, { padding: [40, 40], maxZoom: 7 });
