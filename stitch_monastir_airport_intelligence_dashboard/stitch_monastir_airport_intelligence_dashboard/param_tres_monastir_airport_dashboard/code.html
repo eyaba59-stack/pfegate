@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Paramètres du Compte - Monastir Airport</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Active nav indicator smooth transition */
+        .nav-item {
+            position: relative;
+        }
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background-color: transparent;
+            transition: background-color 0.2s ease;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface": "#f7f9fb",
+                        "on-tertiary-container": "#75859d",
+                        "outline-variant": "#c6c6cd",
+                        "surface-bright": "#f7f9fb",
+                        "on-tertiary-fixed-variant": "#38485d",
+                        "on-secondary-container": "#004d6a",
+                        "secondary-container": "#40c2fd",
+                        "secondary-fixed": "#c4e7ff",
+                        "outline": "#76777d",
+                        "primary": "#000000",
+                        "surface-variant": "#e0e3e5",
+                        "tertiary-container": "#0b1c30",
+                        "on-secondary-fixed-variant": "#004c69",
+                        "error": "#ba1a1a",
+                        "on-tertiary": "#ffffff",
+                        "on-background": "#191c1e",
+                        "surface-container-lowest": "#ffffff",
+                        "on-surface": "#191c1e",
+                        "on-error": "#ffffff",
+                        "tertiary": "#000000",
+                        "background": "#f7f9fb",
+                        "surface-tint": "#565e74",
+                        "surface-container-high": "#e6e8ea",
+                        "error-container": "#ffdad6",
+                        "surface-dim": "#d8dadc",
+                        "on-error-container": "#93000a",
+                        "on-primary": "#ffffff",
+                        "primary-fixed": "#dae2fd",
+                        "tertiary-fixed-dim": "#b7c8e1",
+                        "primary-fixed-dim": "#bec6e0",
+                        "tertiary-fixed": "#d3e4fe",
+                        "on-secondary-fixed": "#001e2c",
+                        "on-tertiary-fixed": "#0b1c30",
+                        "surface-container-low": "#f2f4f6",
+                        "secondary-fixed-dim": "#7bd0ff",
+                        "surface-container": "#eceef0",
+                        "surface-container-highest": "#e0e3e5",
+                        "on-primary-fixed-variant": "#3f465c",
+                        "primary-container": "#131b2e",
+                        "on-primary-fixed": "#131b2e",
+                        "inverse-primary": "#bec6e0",
+                        "on-primary-container": "#7c839b",
+                        "secondary": "#00668a",
+                        "on-surface-variant": "#45464d",
+                        "inverse-surface": "#2d3133",
+                        "on-secondary": "#ffffff",
+                        "inverse-on-surface": "#eff1f3"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "gutter": "16px",
+                        "widget-padding": "20px",
+                        "section-gap": "32px",
+                        "unit": "4px",
+                        "container-margin": "24px"
+                    },
+                    "fontFamily": {
+                        "data-mono": ["JetBrains Mono"],
+                        "body-sm": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "label-caps": ["Inter"]
+                    },
+                    "fontSize": {
+                        "data-mono": ["14px", { "lineHeight": "20px", "fontWeight": "500" }],
+                        "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "display-lg": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "label-caps": ["11px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background antialiased flex h-screen overflow-hidden selection:bg-secondary selection:text-on-secondary">
+<!-- SideNavBar (Shared Component) -->
+<nav class="fixed left-0 top-0 h-screen flex flex-col py-6 w-[260px] bg-primary-container z-20 shadow-md">
+<!-- Header -->
+<div class="px-6 mb-8 flex items-center gap-4">
+<img alt="MIR Logo" class="w-10 h-10 rounded-lg object-cover bg-surface-container" data-alt="A small, minimalist abstract logo for a modern aviation intelligence platform. High contrast, using a deep midnight blue and bright sky blue palette. Corporate, serious, clean aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDbn4CgeOvv_g8HENWWtDY7L3X78b7mH5qJa947z6Cz1N4aGgreNuSUIrBJgaDTz-GD0TUFYe3gYU_DCoBmmjn91b3lX9olmawM4LMYcA4BaCoKPxZ_E6HLl1uj1pHlWUNr5yXoKuxc4cqJ7hrGNEwGuctf0iuaTJb-7C50CzBAGHhgoNUagSe05JV-iE0bIohVKp6pQ_Tv4iIstQCw_e8HAV23wbdYBp4NSCAYhcsvvSjP_L7hntIiFA"/>
+<div>
+<h1 class="text-headline-sm font-headline-sm text-on-primary">Operations Intelligence</h1>
+<p class="text-label-caps font-label-caps text-on-primary-container mt-1">Monastir Airport</p>
+</div>
+</div>
+<!-- Navigation Links -->
+<div class="flex-1 flex flex-col gap-2 px-2 overflow-y-auto">
+<a class="nav-item flex items-center gap-3 px-4 py-3 text-on-tertiary-container hover:bg-surface-variant/10 hover:bg-on-primary/10 transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined text-headline-sm">dashboard</span>
+<span class="text-body-md font-body-md">Tableau de bord</span>
+</a>
+<a class="nav-item flex items-center gap-3 px-4 py-3 text-on-tertiary-container hover:bg-surface-variant/10 hover:bg-on-primary/10 transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined text-headline-sm">flight_takeoff</span>
+<span class="text-body-md font-body-md">Suivi des vols</span>
+</a>
+<a class="nav-item flex items-center gap-3 px-4 py-3 text-on-tertiary-container hover:bg-surface-variant/10 hover:bg-on-primary/10 transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined text-headline-sm">corporate_fare</span>
+<span class="text-body-md font-body-md">Compagnies</span>
+</a>
+<a class="nav-item flex items-center gap-3 px-4 py-3 text-on-tertiary-container hover:bg-surface-variant/10 hover:bg-on-primary/10 transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined text-headline-sm">map</span>
+<span class="text-body-md font-body-md">Destinations</span>
+</a>
+<a class="nav-item flex items-center gap-3 px-4 py-3 text-on-tertiary-container hover:bg-surface-variant/10 hover:bg-on-primary/10 transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined text-headline-sm">timer_off</span>
+<span class="text-body-md font-body-md">Analyse des retards</span>
+</a>
+<a class="nav-item flex items-center gap-3 px-4 py-3 text-on-tertiary-container hover:bg-surface-variant/10 hover:bg-on-primary/10 transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined text-headline-sm">event_busy</span>
+<span class="text-body-md font-body-md">Annulations</span>
+</a>
+<a class="nav-item flex items-center gap-3 px-4 py-3 text-on-tertiary-container hover:bg-surface-variant/10 hover:bg-on-primary/10 transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined text-headline-sm">assessment</span>
+<span class="text-body-md font-body-md">Rapports</span>
+</a>
+<!-- Active State Navigation -->
+<a class="nav-item flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-lg border-l-4 border-secondary scale-[0.99] transition-all" href="#">
+<span class="material-symbols-outlined text-headline-sm" style="font-variation-settings: 'FILL' 1;">settings</span>
+<span class="text-body-md font-body-md font-medium">Paramètres</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Wrapper -->
+<div class="flex-1 ml-[260px] flex flex-col h-screen overflow-hidden bg-background">
+<!-- TopNavBar (Shared Component) -->
+<header class="flex justify-between items-center w-full px-gutter h-16 bg-surface z-10 border-b border-outline-variant">
+<!-- Brand/Title (Hidden on desktop, handled by sidebar, but kept for structural integrity based on JSON) -->
+<div class="flex items-center gap-4">
+<span class="text-headline-md font-headline-md font-bold text-primary">Monastir International Airport</span>
+</div>
+<!-- Right Actions -->
+<div class="flex items-center gap-6">
+<!-- Search -->
+<div class="relative hidden md:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="pl-10 pr-4 py-2 bg-surface-container-low border border-outline-variant rounded-full text-body-sm font-body-sm focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary w-64 transition-all" placeholder="Rechercher..." type="text"/>
+</div>
+<!-- Icons -->
+<div class="flex items-center gap-2">
+<button class="p-2 text-on-surface-variant hover:text-secondary transition-colors opacity-80 hover:opacity-100 rounded-full hover:bg-surface-container-high">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-secondary transition-colors opacity-80 hover:opacity-100 rounded-full hover:bg-surface-container-high">
+<span class="material-symbols-outlined">schedule</span>
+</button>
+</div>
+<!-- Language Links -->
+<div class="flex items-center gap-4 border-l border-outline-variant pl-6">
+<a class="text-on-surface-variant font-medium text-label-caps font-label-caps hover:text-secondary transition-colors" href="#">FR</a>
+<a class="text-secondary font-bold text-label-caps font-label-caps border-b-2 border-secondary pb-1 opacity-80 hover:opacity-100 transition-colors" href="#">EN</a>
+</div>
+<!-- Profile -->
+<div class="ml-2">
+<img alt="Manager Profile" class="w-8 h-8 rounded-full border border-outline-variant object-cover" data-alt="A professional headshot of a corporate manager in a bright, modern office setting. Sharp focus, high key lighting, serious but approachable expression." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAePr6mg6_sMAu9etiHqzT7zeg7hB126ZWYAW92Lz1ZpiSgqEM4unrSL-7PJUgHwKTBm9EE2IszM0OkZNbChHECQl_LF8Ac-HwIUct5ZBgUAW-sWp5k-Wo_oh_OYveWXfAkrQ6YJw3uxqzwe2SdBVmwO_7ZQ-aoDcmuy0GZFKyNNb3ej1VjeeuVyRVDiTjJCcw3yA_CZpDhOtu_QNpsqYMRAw9yteU2HkcWb6tf0nrfOnf8TNI8up78sg"/>
+</div>
+</div>
+</header>
+<!-- Main Scrollable Area -->
+<main class="flex-1 overflow-y-auto p-container-margin">
+<div class="max-w-6xl mx-auto">
+<!-- Page Header -->
+<div class="mb-section-gap">
+<h2 class="text-display-lg font-display-lg text-on-background">Paramètres du Compte</h2>
+<p class="text-body-lg font-body-lg text-on-surface-variant mt-2">Gérez vos préférences, votre sécurité et les accès à la plateforme.</p>
+</div>
+<!-- Settings Layout: Grid (Sidebar Tabs + Content Area) -->
+<div class="grid grid-cols-12 gap-8 items-start">
+<!-- Settings Navigation (Bento Column 1) -->
+<div class="col-span-12 md:col-span-3 bg-surface-container-lowest rounded-xl border border-surface-container-highest p-2 shadow-[0_4px_12px_rgba(15,23,42,0.03)] flex flex-col gap-1">
+<button class="w-full text-left flex items-center gap-3 px-4 py-3 rounded-lg bg-secondary/10 text-secondary border-l-2 border-secondary font-body-md text-body-md transition-all">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">person</span>
+                            Profil
+                        </button>
+<button class="w-full text-left flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low font-body-md text-body-md transition-all group">
+<span class="material-symbols-outlined group-hover:text-on-surface transition-colors">lock</span>
+                            Sécurité
+                        </button>
+<button class="w-full text-left flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low font-body-md text-body-md transition-all group">
+<span class="material-symbols-outlined group-hover:text-on-surface transition-colors">notifications_active</span>
+                            Notifications
+                        </button>
+<button class="w-full text-left flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low font-body-md text-body-md transition-all group">
+<span class="material-symbols-outlined group-hover:text-on-surface transition-colors">tune</span>
+                            Préférences de l'application
+                        </button>
+<button class="w-full text-left flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low font-body-md text-body-md transition-all group">
+<span class="material-symbols-outlined group-hover:text-on-surface transition-colors">admin_panel_settings</span>
+                            Gestion des accès
+                        </button>
+</div>
+<!-- Settings Content (Bento Column 2) -->
+<div class="col-span-12 md:col-span-9 flex flex-col gap-6">
+<!-- Profile Card -->
+<div class="bg-surface-container-lowest rounded-xl border border-surface-container-highest shadow-[0_4px_12px_rgba(15,23,42,0.03)] hover:shadow-md transition-shadow">
+<div class="p-widget-padding border-b border-surface-container-highest flex justify-between items-center">
+<div>
+<h3 class="text-headline-sm font-headline-sm text-on-background">Informations Personnelles</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant mt-1">Mettez à jour vos informations de contact de base.</p>
+</div>
+</div>
+<div class="p-widget-padding flex flex-col gap-6">
+<!-- Avatar Upload -->
+<div class="flex items-center gap-6">
+<div class="relative group cursor-pointer">
+<img alt="Profile Picture" class="w-20 h-20 rounded-full object-cover border-2 border-outline-variant" data-alt="A close up of a minimalist, frosted glass corporate ID badge with a placeholder silhouette icon, resting on a clean, modern desk surface. Bright, diffuse lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4UM2OPHrk9wR3uZnoenJQ9jvC4ecioZpVGMsBstL-9kPlNldgp-bmFF_vxJ2XS4HAl-qXho87ICjpigtgOAhx4zYmRB5Yno3UsEaJ4h7lwZEEwcipgy6gJ0ftIaXUDsauBeD2pZviLR-S3PgUI1OJPjjJQBtjt2IyLDtkVDW_CAJNeZFZUpE0YQlTRFsSm0ov9hQt7PAVzan8DzrVnXuIq8_orXwcPi1f2cmKQzqDnG10ZHMdKNu__g"/>
+<div class="absolute inset-0 bg-primary/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-on-primary">photo_camera</span>
+</div>
+</div>
+<div>
+<button class="px-4 py-2 bg-surface-container-high text-on-surface font-body-md text-body-md font-medium rounded-lg hover:bg-surface-dim transition-colors border border-outline-variant">
+                                            Changer la photo
+                                        </button>
+<p class="text-body-sm font-body-sm text-on-surface-variant mt-2">JPG, GIF ou PNG. Max 1MB.</p>
+</div>
+</div>
+<!-- Form Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+<div class="flex flex-col gap-2">
+<label class="text-label-caps font-label-caps text-on-surface">Nom complet</label>
+<input class="px-4 py-2.5 bg-surface rounded-lg border border-outline-variant text-body-md font-body-md text-on-surface focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all" type="text" value="Jean Dupont"/>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-label-caps font-label-caps text-on-surface">Adresse Email</label>
+<input class="px-4 py-2.5 bg-surface rounded-lg border border-outline-variant text-body-md font-body-md text-on-surface focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all" type="email" value="jean.dupont@mir-airport.com"/>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-label-caps font-label-caps text-on-surface">Rôle Principal</label>
+<input class="px-4 py-2.5 bg-surface-container-low rounded-lg border border-outline-variant text-body-md font-body-md text-on-surface-variant cursor-not-allowed" disabled="" type="text" value="Directeur des Opérations"/>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-label-caps font-label-caps text-on-surface">Département</label>
+<input class="px-4 py-2.5 bg-surface-container-low rounded-lg border border-outline-variant text-body-md font-body-md text-on-surface-variant cursor-not-allowed" disabled="" type="text" value="Operations Control Center (OCC)"/>
+</div>
+</div>
+</div>
+<div class="p-4 bg-surface-container-lowest border-t border-surface-container-highest flex justify-end rounded-b-xl">
+<button class="px-6 py-2 bg-primary text-on-primary font-body-md text-body-md font-medium rounded-lg hover:bg-primary/90 transition-colors shadow-sm">
+                                    Enregistrer les modifications
+                                </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

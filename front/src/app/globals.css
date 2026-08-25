@@ -1,0 +1,210 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&family=Material+Symbols+Outlined:wght@100..700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body {
+    @apply h-full;
+  }
+
+  body {
+    @apply bg-surface font-inter text-body-md text-on-surface antialiased;
+  }
+}
+
+/* ---------- Motion keyframes ---------- */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes zoom-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slide-left {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-right {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes grow-y {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes ken-burns {
+  from {
+    transform: scale(1.02) translateY(0);
+  }
+  to {
+    transform: scale(1.12) translateY(-1.5%);
+  }
+}
+
+@keyframes pulse-soft {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+/* Animated utility classes (initially hidden, revealed by .reveal-visible) */
+.reveal {
+  opacity: 0;
+  will-change: opacity, transform;
+}
+
+.reveal-visible {
+  animation-fill-mode: both;
+  animation-duration: 0.55s;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.reveal-fade-up {
+  animation-name: fade-up;
+}
+.reveal-fade-in {
+  animation-name: fade-in;
+}
+.reveal-zoom-in {
+  animation-name: zoom-in;
+}
+.reveal-slide-left {
+  animation-name: slide-left;
+}
+.reveal-slide-right {
+  animation-name: slide-right;
+}
+
+.animate-ken-burns {
+  animation: ken-burns 24s ease-in-out infinite alternate;
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 2s ease-in-out infinite;
+}
+
+.animate-grow-y {
+  transform-origin: bottom;
+  animation: grow-y 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Micro-interactions */
+.motion-hover {
+  @apply transition-all duration-200;
+}
+.motion-hover:hover {
+  transform: translateY(-2px);
+}
+.motion-hover:active {
+  transform: scale(0.98);
+}
+
+.bar-grow {
+  transform-origin: bottom;
+  animation: grow-y 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .reveal-visible,
+  .animate-ken-burns,
+  .animate-pulse-soft,
+  .animate-grow-y,
+  .bar-grow {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+@layer components {
+  .card-shadow {
+    box-shadow: 0px 4px 12px rgba(15, 23, 42, 0.03);
+  }
+
+  .card-hover {
+    @apply transition-all;
+  }
+
+  .card-hover:hover {
+    box-shadow: 0px 8px 16px rgba(15, 23, 42, 0.06);
+    border-left-width: 2px;
+    border-left-color: #40c2fd;
+  }
+
+  .material-symbols-outlined {
+    font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+  }
+
+  .material-symbols-outlined.fill {
+    font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 24;
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #e0e3e5;
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #c6c6cd;
+  }
+}

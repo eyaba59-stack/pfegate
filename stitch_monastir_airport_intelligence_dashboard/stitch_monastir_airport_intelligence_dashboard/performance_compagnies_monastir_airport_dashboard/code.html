@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+
+<html lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Performance des Compagnies - Operations Intelligence</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface": "#f7f9fb",
+                        "on-tertiary-container": "#75859d",
+                        "outline-variant": "#c6c6cd",
+                        "surface-bright": "#f7f9fb",
+                        "on-tertiary-fixed-variant": "#38485d",
+                        "on-secondary-container": "#004d6a",
+                        "secondary-container": "#40c2fd",
+                        "secondary-fixed": "#c4e7ff",
+                        "outline": "#76777d",
+                        "primary": "#000000",
+                        "surface-variant": "#e0e3e5",
+                        "tertiary-container": "#0b1c30",
+                        "on-secondary-fixed-variant": "#004c69",
+                        "error": "#ba1a1a",
+                        "on-tertiary": "#ffffff",
+                        "on-background": "#191c1e",
+                        "surface-container-lowest": "#ffffff",
+                        "on-surface": "#191c1e",
+                        "on-error": "#ffffff",
+                        "tertiary": "#000000",
+                        "background": "#f7f9fb",
+                        "surface-tint": "#565e74",
+                        "surface-container-high": "#e6e8ea",
+                        "error-container": "#ffdad6",
+                        "surface-dim": "#d8dadc",
+                        "on-error-container": "#93000a",
+                        "on-primary": "#ffffff",
+                        "primary-fixed": "#dae2fd",
+                        "tertiary-fixed-dim": "#b7c8e1",
+                        "primary-fixed-dim": "#bec6e0",
+                        "tertiary-fixed": "#d3e4fe",
+                        "on-secondary-fixed": "#001e2c",
+                        "on-tertiary-fixed": "#0b1c30",
+                        "surface-container-low": "#f2f4f6",
+                        "secondary-fixed-dim": "#7bd0ff",
+                        "surface-container": "#eceef0",
+                        "surface-container-highest": "#e0e3e5",
+                        "on-primary-fixed-variant": "#3f465c",
+                        "primary-container": "#131b2e",
+                        "on-primary-fixed": "#131b2e",
+                        "inverse-primary": "#bec6e0",
+                        "on-primary-container": "#7c839b",
+                        "secondary": "#00668a",
+                        "on-surface-variant": "#45464d",
+                        "inverse-surface": "#2d3133",
+                        "on-secondary": "#ffffff",
+                        "inverse-on-surface": "#eff1f3"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "gutter": "16px",
+                        "widget-padding": "20px",
+                        "section-gap": "32px",
+                        "unit": "4px",
+                        "container-margin": "24px"
+                    },
+                    "fontFamily": {
+                        "data-mono": ["JetBrains Mono"],
+                        "body-sm": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "label-caps": ["Inter"]
+                    },
+                    "fontSize": {
+                        "data-mono": ["14px", { "lineHeight": "20px", "fontWeight": "500" }],
+                        "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "display-lg": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "label-caps": ["11px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        .card-shadow {
+            box-shadow: 0px 4px 12px rgba(15, 23, 42, 0.03);
+        }
+        
+        .interactive-card:hover {
+            box-shadow: 0px 8px 24px rgba(15, 23, 42, 0.06);
+            border-left: 2px solid #00668a; /* secondary color */
+            transform: translateY(-1px);
+        }
+        
+        .table-row-hover:hover {
+            background-color: rgba(242, 244, 246, 0.5); /* surface-container-low with opacity */
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md min-h-screen flex">
+<!-- SideNavBar (Hidden on mobile) -->
+<nav class="hidden md:flex bg-primary-container dark:bg-tertiary-container text-on-primary-fixed dark:text-tertiary-fixed fixed left-0 top-0 h-screen w-[260px] flex-col py-6 shadow-md z-20">
+<div class="px-6 mb-8 flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A minimalist, highly legible airport management software logo. The design features a stylized blue and white geometric interpretation of a control tower or airplane tail fin. Clean lines, corporate identity, high-end tech aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDGs5zumkVJhSuy7hJBnHpQHdKI6hkf_cJqxG6xBE50ZT2pmIJj6Pma83rYxvHUcYNVq-1usqk-4pbF5yGy63QPiDTa-pOPLHbuKqH0eZq9c2OKAt8FGA-RdtuXPZwc2zp49KNQacF0mbXZiF4x8D9i5Wq4g9hjdzQ8ZU5wrlm2oAmUJzJwAHAmrnsWPFvRC4I_o0L_FS-QxZIR6XrrW7E_-qIo-36pjYho8CkjWhUi2w9lwO_ZN0skXw"/>
+</div>
+<div>
+<h1 class="text-headline-sm font-headline-sm text-on-primary">Operations Intelligence</h1>
+<p class="text-body-sm font-body-sm text-on-primary-container">Monastir Airport</p>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto px-4 flex flex-col gap-1">
+<a class="flex items-center gap-3 px-4 py-3 text-on-tertiary-container hover:bg-surface-variant/10 rounded-lg transition-all hover:bg-on-primary/10" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-body-md font-body-md">Tableau de bord</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-tertiary-container hover:bg-surface-variant/10 rounded-lg transition-all hover:bg-on-primary/10" href="#">
+<span class="material-symbols-outlined">flight_takeoff</span>
+<span class="text-body-md font-body-md">Suivi des vols</span>
+</a>
+<!-- Active State: Compagnies -->
+<a class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-lg border-l-4 border-secondary transition-all scale-[0.99]" href="#">
+<span class="material-symbols-outlined fill">corporate_fare</span>
+<span class="text-body-md font-body-md font-bold">Compagnies</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-tertiary-container hover:bg-surface-variant/10 rounded-lg transition-all hover:bg-on-primary/10" href="#">
+<span class="material-symbols-outlined">map</span>
+<span class="text-body-md font-body-md">Destinations</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-tertiary-container hover:bg-surface-variant/10 rounded-lg transition-all hover:bg-on-primary/10" href="#">
+<span class="material-symbols-outlined">timer_off</span>
+<span class="text-body-md font-body-md">Analyse des retards</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-tertiary-container hover:bg-surface-variant/10 rounded-lg transition-all hover:bg-on-primary/10" href="#">
+<span class="material-symbols-outlined">event_busy</span>
+<span class="text-body-md font-body-md">Annulations</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-tertiary-container hover:bg-surface-variant/10 rounded-lg transition-all hover:bg-on-primary/10" href="#">
+<span class="material-symbols-outlined">assessment</span>
+<span class="text-body-md font-body-md">Rapports</span>
+</a>
+</div>
+<div class="px-4 mt-auto">
+<a class="flex items-center gap-3 px-4 py-3 text-on-tertiary-container hover:bg-surface-variant/10 rounded-lg transition-all hover:bg-on-primary/10" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-body-md font-body-md">Paramètres</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 md:ml-[260px] min-h-screen flex flex-col">
+<!-- TopNavBar (Web & Mobile) -->
+<header class="bg-surface dark:bg-surface-container border-b border-outline-variant dark:border-outline flex justify-between items-center w-full px-gutter h-16 sticky top-0 z-10 transition-colors">
+<!-- Mobile Menu Toggle -->
+<button class="md:hidden text-primary p-2">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<!-- Brand / Title for Mobile -->
+<div class="md:hidden text-headline-md font-headline-md font-bold text-primary dark:text-inverse-primary truncate max-w-[200px]">
+                MIR Analytics
+            </div>
+<div class="hidden md:block flex-1">
+<!-- Page Title Anchor -->
+<h2 class="text-headline-sm font-headline-sm text-primary font-bold">Performance des Compagnies</h2>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden md:flex bg-surface-container-low rounded-full px-4 py-1.5 items-center border border-outline-variant">
+<span class="material-symbols-outlined text-outline mr-2 text-[18px]">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-body-sm font-body-sm w-48 text-on-surface placeholder-on-surface-variant" placeholder="Rechercher une compagnie..." type="text"/>
+</div>
+<div class="flex items-center gap-1">
+<button class="p-2 text-primary dark:text-inverse-primary hover:text-secondary transition-colors rounded-full hover:bg-surface-container-high">
+<span class="material-symbols-outlined text-[22px]">notifications</span>
+</button>
+<button class="p-2 text-primary dark:text-inverse-primary hover:text-secondary transition-colors rounded-full hover:bg-surface-container-high">
+<span class="material-symbols-outlined text-[22px]">schedule</span>
+</button>
+</div>
+<div class="w-px h-6 bg-outline-variant mx-2"></div>
+<div class="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
+<div class="w-8 h-8 rounded-full bg-tertiary-fixed-dim overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="A professional headshot of an airport operations manager. They are wearing a dark blue suit jacket over a crisp white shirt, standing in a brightly lit modern office environment with blurred airport tarmac visible through a window in the background. Calm, authoritative expression." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCCYUqTdoTVDKoFr21pJCbyAsGLe7wlL-d1CDeUNX9yv8MpQGbF3KhzaWU-3gmDEtifg-epmrZNzu_gfnPZMA1a6lzKMeU_hgUY3dXjykiQOkM4C13qkcaq5xKWioK0yPkiB16KAJfnDbJthQ0RR9kjMt0_c2lmriFC2-XJXgOk0Wo2thxNtUwfrUjqAcPOkka0hfwuifmiSjHXmBM7RKAkS1rU9Ffpj0iub2jaP3TvF4TW6-ri6zeZvg"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Dashboard Canvas -->
+<div class="p-container-margin md:p-section-gap max-w-[1600px] w-full mx-auto space-y-container-margin">
+<!-- KPI Section (Bento Grid) -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<!-- KPI 1: Best Performing Airline -->
+<div class="bg-surface-container-lowest border border-surface-container-highest rounded-lg p-widget-padding card-shadow interactive-card transition-all flex flex-col justify-between h-36">
+<div class="flex justify-between items-start">
+<span class="text-label-caps font-label-caps text-on-surface-variant">MEILLEURE PERFORMANCE</span>
+<div class="bg-secondary-container/20 text-on-secondary-container p-1 rounded-md">
+<span class="material-symbols-outlined text-[16px]">trophy</span>
+</div>
+</div>
+<div>
+<div class="text-display-lg font-display-lg text-primary">Tunisair</div>
+<div class="flex items-center gap-1 mt-1 text-secondary">
+<span class="material-symbols-outlined text-[14px]">arrow_upward</span>
+<span class="text-body-sm font-body-sm font-medium">94.2% Ponctualité</span>
+</div>
+</div>
+</div>
+<!-- KPI 2: Worst Delay Average -->
+<div class="bg-surface-container-lowest border border-surface-container-highest rounded-lg p-widget-padding card-shadow interactive-card transition-all flex flex-col justify-between h-36">
+<div class="flex justify-between items-start">
+<span class="text-label-caps font-label-caps text-on-surface-variant">RETARD MOYEN MAXIMAL</span>
+<div class="bg-error-container/40 text-on-error-container p-1 rounded-md">
+<span class="material-symbols-outlined text-[16px]">timer</span>
+</div>
+</div>
+<div>
+<div class="text-display-lg font-display-lg text-primary">Air France</div>
+<div class="flex items-center gap-1 mt-1 text-error">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+<span class="text-body-sm font-body-sm font-medium">42 mins moy.</span>
+</div>
+</div>
+</div>
+<!-- KPI 3: Most Reliable Partner -->
+<div class="bg-surface-container-lowest border border-surface-container-highest rounded-lg p-widget-padding card-shadow interactive-card transition-all flex flex-col justify-between h-36">
+<div class="flex justify-between items-start">
+<span class="text-label-caps font-label-caps text-on-surface-variant">PARTENAIRE LE PLUS FIABLE</span>
+<div class="bg-surface-container-highest text-on-surface p-1 rounded-md">
+<span class="material-symbols-outlined text-[16px]">verified</span>
+</div>
+</div>
+<div>
+<div class="text-display-lg font-display-lg text-primary">Nouvelair</div>
+<div class="flex items-center gap-1 mt-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+<span class="text-body-sm font-body-sm font-medium">0.1% Taux d'annulation</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Leaderboard Table -->
+<div class="bg-surface-container-lowest border border-surface-container-highest rounded-lg card-shadow overflow-hidden flex flex-col">
+<div class="p-4 border-b border-surface-container-highest bg-surface-bright flex justify-between items-center">
+<h3 class="text-headline-sm font-headline-sm text-primary">Classement Opérationnel (30 Derniers Jours)</h3>
+<button class="text-secondary flex items-center gap-1 hover:opacity-80">
+<span class="text-body-sm font-body-sm font-medium">Exporter CSV</span>
+<span class="material-symbols-outlined text-[16px]">download</span>
+</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low text-on-surface-variant border-b border-surface-container-highest">
+<th class="px-4 py-3 text-label-caps font-label-caps w-1/4">COMPAGNIE</th>
+<th class="px-4 py-3 text-label-caps font-label-caps text-right">VOLS TOTAUX</th>
+<th class="px-4 py-3 text-label-caps font-label-caps text-right">PONCTUALITÉ</th>
+<th class="px-4 py-3 text-label-caps font-label-caps text-right">ANNULATIONS</th>
+<th class="px-4 py-3 text-label-caps font-label-caps text-right">SCORE GLOBAL</th>
+</tr>
+</thead>
+<tbody class="text-body-md font-body-md">
+<!-- Row 1 -->
+<tr class="border-b border-surface-container-highest table-row-hover transition-colors">
+<td class="px-4 py-3 font-medium flex items-center gap-2">
+<div class="w-6 h-6 bg-surface-container rounded-sm flex items-center justify-center text-[10px] font-bold text-on-surface-variant">TU</div>
+                                    Tunisair
+                                </td>
+<td class="px-4 py-3 text-right font-data-mono text-data-mono">1,245</td>
+<td class="px-4 py-3 text-right">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-secondary-container/20 text-on-secondary-container text-body-sm font-body-sm">
+                                        94.2%
+                                    </span>
+</td>
+<td class="px-4 py-3 text-right font-data-mono text-data-mono">0.3%</td>
+<td class="px-4 py-3 text-right">
+<div class="flex items-center justify-end gap-2">
+<div class="w-24 h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-secondary" style="width: 96%"></div>
+</div>
+<span class="font-bold">96/100</span>
+</div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="border-b border-surface-container-highest table-row-hover transition-colors">
+<td class="px-4 py-3 font-medium flex items-center gap-2">
+<div class="w-6 h-6 bg-surface-container rounded-sm flex items-center justify-center text-[10px] font-bold text-on-surface-variant">BJ</div>
+                                    Nouvelair
+                                </td>
+<td class="px-4 py-3 text-right font-data-mono text-data-mono">890</td>
+<td class="px-4 py-3 text-right">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-secondary-container/20 text-on-secondary-container text-body-sm font-body-sm">
+                                        91.5%
+                                    </span>
+</td>
+<td class="px-4 py-3 text-right font-data-mono text-data-mono text-secondary">0.1%</td>
+<td class="px-4 py-3 text-right">
+<div class="flex items-center justify-end gap-2">
+<div class="w-24 h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-secondary" style="width: 92%"></div>
+</div>
+<span class="font-bold">92/100</span>
+</div>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="border-b border-surface-container-highest table-row-hover transition-colors">
+<td class="px-4 py-3 font-medium flex items-center gap-2">
+<div class="w-6 h-6 bg-surface-container rounded-sm flex items-center justify-center text-[10px] font-bold text-on-surface-variant">LH</div>
+                                    Lufthansa
+                                </td>
+<td class="px-4 py-3 text-right font-data-mono text-data-mono">420</td>
+<td class="px-4 py-3 text-right">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-surface-container-highest text-on-surface-variant text-body-sm font-body-sm">
+                                        85.0%
+                                    </span>
+</td>
+<td class="px-4 py-3 text-right font-data-mono text-data-mono">1.2%</td>
+<td class="px-4 py-3 text-right">
+<div class="flex items-center justify-end gap-2">
+<div class="w-24 h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-outline" style="width: 82%"></div>
+</div>
+<span class="font-bold">82/100</span>
+</div>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="table-row-hover transition-colors">
+<td class="px-4 py-3 font-medium flex items-center gap-2">
+<div class="w-6 h-6 bg-surface-container rounded-sm flex items-center justify-center text-[10px] font-bold text-on-surface-variant">AF</div>
+                                    Air France
+                                </td>
+<td class="px-4 py-3 text-right font-data-mono text-data-mono">650</td>
+<td class="px-4 py-3 text-right">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-error-container/40 text-error text-body-sm font-body-sm">
+                                        72.4%
+                                    </span>
+</td>
+<td class="px-4 py-3 text-right font-data-mono text-data-mono text-error">3.5%</td>
+<td class="px-4 py-3 text-right">
+<div class="flex items-center justify-end gap-2">
+<div class="w-24 h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-error" style="width: 65%"></div>
+</div>
+<span class="font-bold">65/100</span>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Chart Section (Simplified representation via CSS layout, mimicking a chart area) -->
+<div class="bg-surface-container-lowest border border-surface-container-highest rounded-lg p-widget-padding card-shadow flex flex-col min-h-[300px]">
+<div class="flex justify-between items-start mb-6">
+<div>
+<h3 class="text-headline-sm font-headline-sm text-primary">Tendances des Retards (Minutes)</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant mt-1">Comparaison des temps de retard moyens par semaine.</p>
+</div>
+<div class="flex gap-2">
+<span class="inline-flex items-center gap-1 text-label-caps font-label-caps text-on-surface-variant">
+<span class="w-2 h-2 rounded-full bg-secondary"></span> Tunisair
+                        </span>
+<span class="inline-flex items-center gap-1 text-label-caps font-label-caps text-on-surface-variant">
+<span class="w-2 h-2 rounded-full bg-outline"></span> Air France
+                        </span>
+</div>
+</div>
+<!-- Mock Bar Chart Area -->
+<div class="flex-1 flex items-end gap-8 pt-8 pb-4 px-4 border-l border-b border-surface-container-highest relative mt-4">
+<!-- Y Axis Labels -->
+<div class="absolute -left-8 top-0 bottom-4 flex flex-col justify-between text-[10px] text-on-surface-variant text-right">
+<span>60m</span>
+<span>45m</span>
+<span>30m</span>
+<span>15m</span>
+<span>0m</span>
+</div>
+<!-- Week 1 -->
+<div class="flex-1 flex justify-center items-end gap-1 group">
+<div class="w-8 bg-secondary rounded-t-sm h-[20%] transition-all group-hover:opacity-80"></div>
+<div class="w-8 bg-outline rounded-t-sm h-[60%] transition-all group-hover:opacity-80"></div>
+<span class="absolute -bottom-6 text-body-sm font-body-sm text-on-surface-variant">Sem 1</span>
+</div>
+<!-- Week 2 -->
+<div class="flex-1 flex justify-center items-end gap-1 group">
+<div class="w-8 bg-secondary rounded-t-sm h-[15%] transition-all group-hover:opacity-80"></div>
+<div class="w-8 bg-outline rounded-t-sm h-[80%] transition-all group-hover:opacity-80"></div>
+<span class="absolute -bottom-6 text-body-sm font-body-sm text-on-surface-variant">Sem 2</span>
+</div>
+<!-- Week 3 -->
+<div class="flex-1 flex justify-center items-end gap-1 group">
+<div class="w-8 bg-secondary rounded-t-sm h-[25%] transition-all group-hover:opacity-80"></div>
+<div class="w-8 bg-outline rounded-t-sm h-[50%] transition-all group-hover:opacity-80"></div>
+<span class="absolute -bottom-6 text-body-sm font-body-sm text-on-surface-variant">Sem 3</span>
+</div>
+<!-- Week 4 -->
+<div class="flex-1 flex justify-center items-end gap-1 group">
+<div class="w-8 bg-secondary rounded-t-sm h-[10%] transition-all group-hover:opacity-80"></div>
+<div class="w-8 bg-outline rounded-t-sm h-[70%] transition-all group-hover:opacity-80"></div>
+<span class="absolute -bottom-6 text-body-sm font-body-sm text-on-surface-variant">Sem 4</span>
+</div>
+<!-- Grid Lines -->
+<div class="absolute left-0 right-0 top-0 border-t border-surface-container-highest border-dashed opacity-50 z-[-1]"></div>
+<div class="absolute left-0 right-0 top-[25%] border-t border-surface-container-highest border-dashed opacity-50 z-[-1]"></div>
+<div class="absolute left-0 right-0 top-[50%] border-t border-surface-container-highest border-dashed opacity-50 z-[-1]"></div>
+<div class="absolute left-0 right-0 top-[75%] border-t border-surface-container-highest border-dashed opacity-50 z-[-1]"></div>
+</div>
+</div>
+</div>
+</main>
+</body></html>
