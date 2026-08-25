@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
-import { MapContainer, TileLayer, Marker, Polyline, Popup, useMap } from "react-leaflet";
+import { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -11,29 +10,27 @@ interface DestData {
   city: string;
   country: string;
   passengers: number;
-  sharePercent: number;
-  barColor: string;
   lat: number;
   lng: number;
 }
 
 export const MONASTIR = { lat: 35.7581, lng: 10.7545 };
 
-const markerIcon = (selected: boolean) =>
-  L.divIcon({
+function makeMarkerIcon(selected: boolean) {
+  const size = selected ? 18 : 12;
+  return L.divIcon({
     className: "",
-    iconSize: [selected ? 18 : 12, selected ? 18 : 12],
-    iconAnchor: [selected ? 9 : 6, selected ? 9 : 6],
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
     html: `<div style="
-      width:${selected ? 18 : 12}px;
-      height:${selected ? 18 : 12}px;
-      border-radius:50%;
+      width:${size}px;height:${size}px;border-radius:50%;
       background:${selected ? "#00668a" : "#131b2e"};
       border:2px solid #fff;
       box-shadow:0 2px 6px rgba(0,0,0,.35);
       transition:all .2s;
     "/>`,
   });
+}
 
 const hubIcon = L.divIcon({
   className: "",
@@ -43,26 +40,8 @@ const hubIcon = L.divIcon({
     width:24px;height:24px;border-radius:50%;
     background:#00668a;border:3px solid #fff;
     box-shadow:0 2px 8px rgba(0,102,138,.5);
-    display:flex;align-items:center;justify-content:center;
-  "><div style="width:8px;height:8px;border-radius:50%;background:#fff;animation:pulse 2s infinite"/></div>`,
+  "></div>`,
 });
-
-function FitBounds({ destinations }: { destinations: DestData[] }) {
-  const map = useMap();
-  useEffect(() => {
-    if (destinations.length === 0) return;
-    if (destinations.length === 1) {
-      map.setView([destinations[0].lat, destinations[0].lng], 6);
-      return;
-    }
-    const bounds = L.latLngBounds(
-      destinations.map((d) => [d.lat, d.lng] as [number, number])
-    );
-    bounds.extend([MONASTIR.lat, MONASTIR.lng]);
-    map.fitBounds(bounds, { padding: [40, 40], maxZoom: 7 });
-  }, [destinations, map]);
-  return null;
-}
 
 interface LeafletMapProps {
   destinations: DestData[];
@@ -71,63 +50,108 @@ interface LeafletMapProps {
 }
 
 export default function LeafletMap({ destinations, selected, onSelect }: LeafletMapProps) {
-  return (
-    <MapContainer
-      center={[MONASTIR.lat, MONASTIR.lng]}
-      zoom={5}
-      className="h-full w-full"
-      zoomControl={false}
-      style={{ background: "#f2f4f6" }}
-    >
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-      />
+  const containerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<L.Map | null>(null);
+  const markersRef = useRef<Map<string, L.Marker>>(new Map());
+  const polylinesRef = useRef<Map<string, L.Polyline>>(new Map());
+  const hubRef = useRef<L.Marker | null>(null);
 
-      <FitBounds destinations={destinations} />
+  useEffect(() => {
+    if (!containerRef.current || mapRef.current) return;
 
-      <Marker position={[MONASTIR.lat, MONASTIR.lng]} icon={hubIcon}>
-        <Popup>
-          <div className="text-center">
-            <strong>MIR — Monastir</strong>
-            <br />
-            Aéroport International
-          </div>
-        </Popup>
-      </Marker>
+    const map = L.map(containerRef.current, {
+      center: [MONASTIR.lat, MONASTIR.lng],
+      zoom: 5,
+      zoomControl: false,
+    });
 
-      {destinations.map((d) => (
-        <div key={d.code}>
-          <Polyline
-            positions={[
-              [MONASTIR.lat, MONASTIR.lng],
-              [d.lat, d.lng],
-            ]}
-            pathOptions={{
-              color: selected === d.code ? "#00668a" : "#40c2fd",
-              weight: selected === d.code ? 3 : 1.5,
-              opacity: selected === d.code ? 1 : 0.5,
-              dashArray: selected === d.code ? undefined : "6 8",
-            }}
-            eventHandlers={{ click: () => onSelect(d.code) }}
-          />
-          <Marker
-            position={[d.lat, d.lng]}
-            icon={markerIcon(selected === d.code)}
-            eventHandlers={{ click: () => onSelect(d.code) }}
-          >
-            <Popup>
-              <div className="text-center">
-                <strong>{d.city} ({d.code})</strong>
-                <br />
-                {d.country}
-                <br />
-                <span className="font-semibold">{d.passengers.toLocaleString("fr-FR")} pax</span>
-              </div>
-            </Popup>
-          </Marker>
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
+    }).addTo(map);
+
+    L.control.zoom({ position: "bottomright" }).addTo(map);
+
+    mapRef.current = map;
+
+    return () => {
+      map.remove();
+      mapRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    markersRef.current.forEach((m) => map.removeLayer(m));
+    markersRef.current.clear();
+    polylinesRef.current.forEach((p: L.Polyline) => map.removeLayer(p));
+    polylinesRef.current.clear();
+    if (hubRef.current) {
+      map.removeLayer(hubRef.current);
+    }
+
+    const hub = L.marker([MONASTIR.lat, MONASTIR.lng] as L.LatLngExpression, { icon: hubIcon, interactive: false }).addTo(map);
+    hubRef.current = hub;
+
+    const bounds = L.latLngBounds([[MONASTIR.lat, MONASTIR.lng]]);
+
+    destinations.forEach((d) => {
+      const pos = L.latLng(d.lat, d.lng);
+      bounds.extend(pos);
+
+      const polyline = L.polyline(
+        [pos, L.latLng(MONASTIR.lat, MONASTIR.lng)],
+        {
+          color: "#40c2fd",
+          weight: 1.5,
+          opacity: 0.5,
+          dashArray: "6 8",
+        }
+      ).addTo(map);
+      polyline.on("click", () => onSelect(d.code));
+      polylinesRef.current.set(`poly-${d.code}`, polyline);
+
+      const marker = L.marker(pos, { icon: makeMarkerIcon(false) }).addTo(map);
+      marker.bindPopup(`
+        <div style="text-align:center">
+          <strong>${d.city} (${d.code})</strong><br/>
+          ${d.country}<br/>
+          <span style="font-weight:600">${d.passengers.toLocaleString("fr-FR")} pax</span>
         </div>
-      ))}
-    </MapContainer>
-  );
+      `);
+      marker.on("click", () => onSelect(d.code));
+      markersRef.current.set(d.code, marker);
+    });
+
+    if (destinations.length === 1) {
+      map.setView([destinations[0].lat, destinations[0].lng], 6);
+    } else {
+      map.fitBounds(bounds, { padding: [40, 40], maxZoom: 7 });
+    }
+  }, [destinations, onSelect]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    destinations.forEach((d) => {
+      const marker = markersRef.current.get(d.code);
+      if (marker) {
+        marker.setIcon(makeMarkerIcon(selected === d.code));
+      }
+
+      const polyline = polylinesRef.current.get(`poly-${d.code}`);
+      if (polyline) {
+        polyline.setStyle({
+          color: selected === d.code ? "#00668a" : "#40c2fd",
+          weight: selected === d.code ? 3 : 1.5,
+          opacity: selected === d.code ? 1 : 0.5,
+          dashArray: selected === d.code ? undefined : "6 8",
+        });
+      }
+    });
+  }, [selected, destinations]);
+
+  return <div ref={containerRef} className="h-full w-full" />;
 }
