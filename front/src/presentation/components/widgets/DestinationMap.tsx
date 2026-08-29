@@ -71,8 +71,13 @@ function getLabelOffset(markerX: number, markerY: number, hubX: number, hubY: nu
   };
 }
 
+const MIN_ZOOM = 0.5;
+const MAX_ZOOM = 3;
+const ZOOM_STEP = 0.3;
+
 export default function DestinationMap({ destinations, selected, onSelect }: DestinationMapProps) {
   const [hovered, setHovered] = useState<string | null>(null);
+  const [zoom, setZoom] = useState(1);
   const bounds = useMemo(() => computeBounds(destinations), [destinations]);
   const hub = useMemo(() => project(MIR.lat, MIR.lng, bounds), [bounds]);
 
@@ -88,6 +93,9 @@ export default function DestinationMap({ destinations, selected, onSelect }: Des
     [selected, onSelect]
   );
 
+  const zoomIn = useCallback(() => setZoom((z) => Math.min(MAX_ZOOM, z + ZOOM_STEP)), []);
+  const zoomOut = useCallback(() => setZoom((z) => Math.max(MIN_ZOOM, z - ZOOM_STEP)), []);
+
   return (
     <div className="flex-1 relative w-full h-full bg-[#f2f4f6] overflow-hidden border-t">
       {/* Professional Vector Base Map */}
@@ -96,9 +104,11 @@ export default function DestinationMap({ destinations, selected, onSelect }: Des
           alt="Detailed Vector Map Base"
           className="w-full h-full object-cover opacity-40 mix-blend-multiply grayscale"
           src="https://lh3.googleusercontent.com/aida-public/AB6AXuBWjnrzvUlmLoXOlFF5D69RB8CsezgTepLCItGb5_Xk8M_9v61bj7wVKqr3q1zzxxyNXIUO0GWKZ1nVYRwp12Q0ETXxEp2cFCBIfDdEb9Q9G0JUdOI1k0qRzfnjMJs5nfmBMEx6rmbGgI_oGNIA_NVQmewo03RYg0IzmoCHCZMk-Od6GiufGiBoFWyqfye4ESw35S82zKFpusHL3oknACBvY7XcX7hiVWqr50R1AC7QCNZ8hk7Gp4mQWg"
+          style={{ transform: `scale(${zoom})`, transformOrigin: "center center", transition: "transform 0.3s ease" }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-surface-container-low to-transparent opacity-50 pointer-events-none" />
-        <svg className="absolute inset-0 w-full h-full pointer-events-none" preserveAspectRatio="xMidYMid slice" viewBox="0 0 800 500">
+        <svg className="absolute inset-0 w-full h-full pointer-events-none" preserveAspectRatio="xMidYMid slice" viewBox="0 0 800 500"
+          style={{ transform: `scale(${zoom})`, transformOrigin: "center center", transition: "transform 0.3s ease" }}>
           <g stroke="rgba(118, 119, 125, 0.1)" strokeWidth="1">
             {[100, 200, 300, 400].map((y) => (
               <line key={`h${y}`} x1="0" x2="800" y1={y} y2={y} />
@@ -111,7 +121,8 @@ export default function DestinationMap({ destinations, selected, onSelect }: Des
       </div>
 
       {/* Flight Arcs + Markers */}
-      <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="xMidYMid slice" viewBox="0 0 800 500">
+      <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="xMidYMid slice" viewBox="0 0 800 500"
+        style={{ transform: `scale(${zoom})`, transformOrigin: "center center", transition: "transform 0.3s ease" }}>
         <defs>
           <filter id="glow">
             <feGaussianBlur result="blur" stdDeviation="1.5" />
@@ -159,7 +170,8 @@ export default function DestinationMap({ destinations, selected, onSelect }: Des
       </svg>
 
       {/* Data Labels — each label offset from its marker to avoid overlap */}
-      <div className="absolute inset-0 pointer-events-none">
+      <div className="absolute inset-0 pointer-events-none"
+        style={{ transform: `scale(${zoom})`, transformOrigin: "center center", transition: "transform 0.3s ease" }}>
         <div
           className="absolute text-body-sm font-bold text-on-surface bg-surface-container-lowest/90 backdrop-blur-sm px-2 py-1 rounded shadow-sm border border-surface-variant pointer-events-auto"
           style={{ top: `${(hub.y / 500) * 100}%`, left: `${(hub.x / 800) * 100}%` }}
@@ -194,10 +206,16 @@ export default function DestinationMap({ destinations, selected, onSelect }: Des
 
       {/* Zoom Controls */}
       <div className="absolute bottom-4 right-4 flex flex-col gap-2 z-10">
-        <button className="w-10 h-10 bg-surface-container-lowest rounded-t-lg shadow-md flex items-center justify-center text-on-surface hover:bg-surface-variant transition-colors border border-outline-variant border-b-0">
+        <button
+          onClick={zoomIn}
+          className="w-10 h-10 bg-surface-container-lowest rounded-t-lg shadow-md flex items-center justify-center text-on-surface hover:bg-surface-variant transition-colors border border-outline-variant border-b-0"
+        >
           <span className="material-symbols-outlined">add</span>
         </button>
-        <button className="w-10 h-10 bg-surface-container-lowest rounded-b-lg shadow-md flex items-center justify-center text-on-surface hover:bg-surface-variant transition-colors border border-outline-variant">
+        <button
+          onClick={zoomOut}
+          className="w-10 h-10 bg-surface-container-lowest rounded-b-lg shadow-md flex items-center justify-center text-on-surface hover:bg-surface-variant transition-colors border border-outline-variant"
+        >
           <span className="material-symbols-outlined">remove</span>
         </button>
       </div>
