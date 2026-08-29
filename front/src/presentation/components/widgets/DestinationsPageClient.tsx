@@ -2,12 +2,13 @@
 
 import { useState, useMemo } from "react";
 import dynamic from "next/dynamic";
-import type { Destination } from "@/core/domain/entities/Destination";
+import type { Destination, RegionTraffic } from "@/core/domain/entities/Destination";
+import GroupedBarChart from "./GroupedBarChart";
 
 const DestinationMap = dynamic(() => import("./DestinationMap"), {
   ssr: false,
   loading: () => (
-    <div className="flex h-full items-center justify-center bg-[#f2f4f6]">
+    <div className="flex h-full items-center justify-center bg-surface-container-low">
       <div className="h-8 w-8 animate-spin rounded-full border-2 border-secondary border-t-transparent" />
     </div>
   ),
@@ -16,9 +17,10 @@ const DestinationMap = dynamic(() => import("./DestinationMap"), {
 interface DestinationsPageClientProps {
   destinations: Destination[];
   allDestinations: Destination[];
+  trafficByRegion: RegionTraffic[];
 }
 
-export default function DestinationsPageClient({ destinations, allDestinations }: DestinationsPageClientProps) {
+export default function DestinationsPageClient({ destinations, allDestinations, trafficByRegion }: DestinationsPageClientProps) {
   const [selected, setSelected] = useState<string | null>(null);
 
   const sortedAll = useMemo(
@@ -30,6 +32,18 @@ export default function DestinationsPageClient({ destinations, allDestinations }
   const maxPax = top5[0]?.passengers || 1;
 
   const formatPax = (n: number) => n.toLocaleString("fr-FR");
+
+  const regionGroups = useMemo(
+    () =>
+      trafficByRegion.map((r) => ({
+        label: r.region,
+        valueA: r.q1,
+        valueB: r.q2,
+        colorA: "#00668a",
+        colorB: "#40c2fd",
+      })),
+    [trafficByRegion]
+  );
 
   return (
     <>
@@ -99,6 +113,21 @@ export default function DestinationsPageClient({ destinations, allDestinations }
       </div>
 
       {/* Row 2: Traffic Evolution Chart (12 cols) */}
+      <div className="col-span-12 bg-surface-container-lowest border border-surface-variant rounded-xl shadow-[0px_4px_12px_rgba(15,23,42,0.03)] p-widget-padding">
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h3 className="text-headline-sm font-headline-sm text-on-surface">Évolution du Trafic par Région</h3>
+            <p className="text-body-sm font-body-sm text-on-surface-variant mt-1">Comparaison trimestrielle des volumes (Vols)</p>
+          </div>
+        </div>
+        {regionGroups.length > 0 ? (
+          <GroupedBarChart groups={regionGroups} legendA="Q1" legendB="Q2" height={256} />
+        ) : (
+          <div className="flex h-64 items-center justify-center text-on-surface-variant">
+            Aucune donnée de trafic par région disponible.
+          </div>
+        )}
+      </div>
     </>
   );
 }
