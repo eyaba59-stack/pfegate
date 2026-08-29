@@ -1,6 +1,6 @@
 import { Destination } from "../models/Destination.js";
 import { mapDestination } from "../utils/mappers.js";
-import { computeDestinationAnalysis } from "../services/biService.js";
+import { computeDestinationAnalysis, computeAllDestinations } from "../services/biService.js";
 import { asyncHandler } from "../middleware/auth.js";
 
 /** GET /api/destinations/top — top by passengers (trailing 30 days ending at ?date=). */
@@ -15,20 +15,8 @@ export const getTrafficByRegion = asyncHandler(async (req, res) => {
   res.json({ trafficByRegion });
 });
 
-/** GET /api/destinations — all destination dimension rows with lat/lng. */
-export const listDestinations = asyncHandler(async (_req, res) => {
-  const destinations = await Destination.find().sort({ rank: 1 }).lean();
-  res.json({
-    destinations: destinations.map((d) => ({
-      code: d.code,
-      city: d.city,
-      country: d.country,
-      region: d.region,
-      lat: d.lat,
-      lng: d.lng,
-      passengers: d.passengers,
-      flightsCount: d.flightsCount,
-      rank: d.rank,
-    })),
-  });
+/** GET /api/destinations — ALL destinations with real passenger counts from Flight table. */
+export const listDestinations = asyncHandler(async (req, res) => {
+  const allDestinations = await computeAllDestinations(req.query.date);
+  res.json({ destinations: allDestinations });
 });

@@ -362,6 +362,43 @@ export async function computeDestinationAnalysis(date) {
   return { topDestinations: destinations, trafficByRegion };
 }
 
+/** ALL destinations with real passenger counts from the Flight table, trailing 30 days. */
+export async function computeAllDestinations(date) {
+  const { from, to } = rangeFor(await refDate(date), 30);
+  const agg = await Flight.aggregate([
+    { $match: { type: "DEPARTURE", destinationCode: { $nin: ["", null] }, scheduledDateTime: { $gte: from, $lte: to } } },
+    {
+      $group: {
+        _id: { code: "$destinationCode", name: "$destination" },
+        passengers: { $sum: "$passengers" },
+        flights: { $sum: 1 },
+      },
+    },
+    { $sort: { passengers: -1 } },
+  ]);
+
+  const allDests = await Destination.find().lean();
+  const destMap = new Map(allDests.map((d) => [d.code, d]));
+
+  const totalPax = agg.reduce((acc, r) => acc + r.passengers, 0) || 1;
+
+  return agg.map((r, i) => {
+    const meta = destMap.get(r._id.code);
+    return {
+      rank: i + 1,
+      city: meta?.city ?? r._id.name.split(" (")[0],
+      code: r._id.code,
+      country: meta?.country ?? "",
+      passengers: r.passengers,
+      sharePercent: Math.round((r.passengers / totalPax) * 100),
+      barColor: barColorForRank(i + 1),
+      flightsCount: r.flights,
+      lat: meta?.lat ?? 0,
+      lng: meta?.lng ?? 0,
+    };
+  });
+}
+
 function barColorForRank(rank) {
   return ["bg-secondary", "bg-secondary-container", "bg-tertiary-fixed-dim", "bg-primary-fixed-dim", "bg-surface-variant"][rank - 1] || "bg-secondary";
 }
