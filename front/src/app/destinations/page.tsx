@@ -12,7 +12,7 @@ interface DestinationsPageProps {
 
 export default async function DestinationsPage({ searchParams }: DestinationsPageProps) {
   const date = searchParams.date;
-  const { topDestinations, allDestinations, trafficByRegion } = await container.getDestinationAnalysis.execute(date);
+  const { topDestinations, allDestinations } = await container.getDestinationAnalysis.execute(date);
 
   return (
     <AppShell title="Monastir International Airport">
@@ -41,7 +41,7 @@ export default async function DestinationsPage({ searchParams }: DestinationsPag
         </header>
 
         <div className="grid grid-cols-12 gap-section-gap">
-          <DestinationsPageClient destinations={topDestinations} allDestinations={allDestinations} trafficByRegion={trafficByRegion} />
+          <DestinationsPageClient destinations={topDestinations} allDestinations={allDestinations} />
         </div>
 
         <footer className="mt-section-gap py-6 text-center text-label-caps font-label-caps text-on-surface-variant border-t border-surface-variant">
