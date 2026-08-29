@@ -63,11 +63,11 @@ function getLabelOffset(markerX: number, markerY: number, hubX: number, hubY: nu
   const dist = Math.sqrt(dx * dx + dy * dy) || 1;
   const normX = dx / dist;
   const normY = dy / dist;
-  const base = 55;
+  const base = 90;
   const spread = (idx % 2 === 0) ? 1 : -1;
   return {
-    dx: Math.round(normX * base + normY * 20 * spread),
-    dy: Math.round(normY * base - normX * 20 * spread),
+    dx: Math.round(normX * base + normY * 35 * spread),
+    dy: Math.round(normY * base - normX * 35 * spread),
   };
 }
 
