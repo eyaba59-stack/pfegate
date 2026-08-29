@@ -9,7 +9,6 @@ import AreaChart from "@/presentation/components/widgets/AreaChart";
 import GroupedBarChart from "@/presentation/components/widgets/GroupedBarChart";
 import HorizontalDelayBars from "@/presentation/components/widgets/HorizontalDelayBars";
 import AirlineHighlights from "@/presentation/components/widgets/AirlineHighlights";
-import DestinationRankList from "@/presentation/components/widgets/DestinationRankList";
 import DateFilter from "@/presentation/components/features/DateFilter";
 import Reveal from "@/presentation/components/ui/Reveal";
 import Icon from "@/presentation/components/ui/Icon";
@@ -32,11 +31,10 @@ interface DashboardPageProps {
 
 export default async function DashboardPage({ searchParams }: DashboardPageProps) {
   const date = searchParams.date;
-  const [overview, analytics, performance, destinations, hourlyTraffic] = await Promise.all([
+  const [overview, analytics, performance, hourlyTraffic] = await Promise.all([
     container.getDashboardOverview.execute(date),
     container.getAnalyticsOverview.execute(date),
     container.getAirlinePerformance.execute(date),
-    container.getDestinationAnalysis.execute(date),
     container.getHourlyTraffic.execute(date),
   ]);
   const { kpis, liveFlights } = overview;
@@ -111,9 +109,9 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           <AirlineHighlights highlights={performance.highlights} />
         </Reveal>
 
-        {/* Monthly volume + top destinations */}
+        {/* Monthly volume */}
         <section className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-          <Reveal animation="fade-up" delay={140} className="lg:col-span-8">
+          <Reveal animation="fade-up" delay={140} className="lg:col-span-12">
             <WidgetCard
               title="Évolution du Volume de Vols (Mensuel)"
               subtitle="Tendances globales des mouvements aériens sur l'année."
@@ -121,15 +119,6 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
             >
               <AreaChart points={analytics.monthlyVolume} />
             </WidgetCard>
-          </Reveal>
-          <Reveal animation="slide-left" delay={220} className="lg:col-span-4">
-            <div className="flex h-full flex-col rounded-lg border border-surface-variant bg-surface-container-lowest p-widget-padding card-shadow">
-              <h3 className="font-headline-sm text-headline-sm text-primary">Top 5 Destinations</h3>
-              <p className="mb-4 mt-1 font-body-sm text-body-sm text-on-surface-variant">
-                Volume de passagers au départ de MIR
-              </p>
-              <DestinationRankList destinations={destinations.topDestinations} />
-            </div>
           </Reveal>
         </section>
 
