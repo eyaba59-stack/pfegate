@@ -54,8 +54,16 @@ export default function DestinationsPageClient({ destinations, allDestinations, 
         <div className="p-widget-padding flex-1 flex flex-col gap-6 overflow-y-auto">
           {top5.map((d) => {
             const pctWidth = Math.round((d.passengers / maxPax) * 100);
+            const isActive = selected === d.code;
             return (
-              <div key={d.code}>
+              <div
+                key={d.code}
+                className={`cursor-pointer rounded-lg p-2 transition-all duration-200 border-2 border-transparent ${
+                  isActive ? "bg-secondary-container/20 border-secondary/40" : "hover:bg-surface-container"
+                }`}
+                style={{ opacity: selected && !isActive ? 0.4 : 1 }}
+                onClick={() => setSelected(isActive ? null : d.code)}
+              >
                 <div className="flex justify-between items-end mb-2">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-on-surface font-bold text-body-sm">

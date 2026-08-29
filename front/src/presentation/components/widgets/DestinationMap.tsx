@@ -66,15 +66,27 @@ export default function DestinationMap({ destinations, selected, onSelect }: Des
             return (
               <div
                 key={d.code}
-                className={`absolute w-3 h-3 rounded-full border border-on-secondary shadow-sm cursor-pointer transition-all duration-300 ${
-                  isActive
-                    ? "bg-secondary-container animate-pulse ring-2 ring-secondary ring-offset-1"
-                    : "bg-secondary-container hover:ring-1 hover:ring-secondary/50"
+                className={`absolute cursor-pointer transition-all duration-300 group/marker ${
+                  isActive ? "z-20" : "z-10"
                 }`}
-                style={{ top: d.top, left: d.left }}
+                style={{ top: d.top, left: d.left, transform: "translate(-50%, -50%)" }}
                 onClick={() => onSelect(isActive ? null : d.code)}
-                title={`${d.city} (${d.code}) - ${d.passengers.toLocaleString("fr-FR")} pax`}
-              />
+              >
+                <div
+                  className={`w-4 h-4 rounded-full border-2 border-white shadow-md transition-all duration-300 ${
+                    isActive
+                      ? "bg-secondary-container animate-pulse ring-2 ring-secondary ring-offset-1 scale-125"
+                      : "bg-secondary-container hover:ring-2 hover:ring-secondary/50 hover:scale-110"
+                  }`}
+                />
+                <div
+                  className={`absolute left-1/2 -translate-x-1/2 mt-1 whitespace-nowrap bg-primary-container/95 backdrop-blur text-on-primary px-2 py-0.5 rounded text-[11px] font-medium shadow-md pointer-events-none transition-all duration-200 ${
+                    isActive ? "opacity-100" : "opacity-0 group-hover/marker:opacity-100"
+                  }`}
+                >
+                  {d.city} ({d.code})
+                </div>
+              </div>
             );
           })}
         </div>
