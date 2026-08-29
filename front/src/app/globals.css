@@ -220,4 +220,125 @@
   .leaflet-popup-pane {
     z-index: 1000 !important;
   }
+
+  .dest-map .leaflet-container {
+    height: 100%;
+    width: 100%;
+    background: #e8eaed;
+    font-family: inherit;
+  }
+
+  .dest-map .leaflet-control-attribution {
+    background: rgba(255, 255, 255, 0.72);
+    font-size: 10px;
+    color: #5f6368;
+  }
+
+  .dest-map-icon {
+    background: transparent;
+    border: none;
+  }
+
+  .dest-map-hub {
+    position: relative;
+    width: 36px;
+    height: 36px;
+  }
+
+  .dest-map-hub-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+    background: rgba(0, 102, 138, 0.22);
+    animation: dest-map-pulse 2.2s ease-out infinite;
+  }
+
+  .dest-map-hub-dot {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 14px;
+    height: 14px;
+    border-radius: 999px;
+    background: #00668a;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.28);
+    transform: translate(-50%, -50%);
+  }
+
+  .dest-map-pin {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  .dest-map-pin.is-dimmed {
+    opacity: 0.28;
+  }
+
+  .dest-map-pin-dot {
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+    border-radius: 999px;
+    background: #131b2e;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.25);
+  }
+
+  .dest-map-pin.is-active .dest-map-pin-dot {
+    width: 14px;
+    height: 14px;
+    background: #40c2fd;
+    box-shadow: 0 0 0 4px rgba(64, 194, 253, 0.28);
+  }
+
+  .dest-map-pin-label {
+    padding: 2px 7px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.94);
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    color: #131b2e;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.4;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+  }
+
+  .dest-map-pin.is-active .dest-map-pin-label {
+    background: #00668a;
+    border-color: #00668a;
+    color: #fff;
+  }
+
+  .dest-map-tooltip {
+    background: #131b2e;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .dest-map-tooltip::before {
+    border-top-color: #131b2e;
+  }
+}
+
+@keyframes dest-map-pulse {
+  0% {
+    transform: scale(0.55);
+    opacity: 0.7;
+  }
+  70% {
+    transform: scale(1);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
 }

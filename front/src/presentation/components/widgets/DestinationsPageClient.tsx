@@ -1,6 +1,16 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import dynamic from "next/dynamic";
+
+const GoogleMapWidget = dynamic(() => import("./GoogleMapWidget"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-full items-center justify-center bg-[#f2f4f6]">
+      <div className="h-8 w-8 animate-spin rounded-full border-2 border-secondary border-t-transparent" />
+    </div>
+  ),
+});
 
 interface DestData {
   rank: number;
@@ -14,47 +24,24 @@ interface DestData {
   lng: number;
 }
 
-const MONASTIR: [number, number] = [35.7581, 10.7545];
-
-function toMercY(lat: number): number {
-  const rad = (lat * Math.PI) / 180;
-  return Math.log(Math.tan(Math.PI / 4 + rad / 2));
-}
-
-function project(
-  lat: number,
-  lng: number,
-  projBounds: { xMin: number; xMax: number; yMin: number; yMax: number },
-  svgW: number,
-  svgH: number,
-  pad: number
-): [number, number] {
-  const xNorm = (lng - projBounds.xMin) / (projBounds.xMax - projBounds.xMin);
-  const yNorm = (toMercY(lat) - projBounds.yMin) / (projBounds.yMax - projBounds.yMin);
-  const x = pad + xNorm * (svgW - 2 * pad);
-  const y = pad + (1 - yNorm) * (svgH - 2 * pad);
-  return [x, y];
-}
-
-function computeProjBounds(dests: [number, number][]) {
-  const allLngs = dests.map((d) => d[1]);
-  const allMercY = dests.map((d) => toMercY(d[0]));
-  const padLng = (Math.max(...allLngs) - Math.min(...allLngs)) * 0.12 || 5;
-  const padY = (Math.max(...allMercY) - Math.min(...allMercY)) * 0.12 || 0.5;
-  return {
-    xMin: Math.min(...allLngs) - padLng,
-    xMax: Math.max(...allLngs) + padLng,
-    yMin: Math.min(...allMercY) - padY,
-    yMax: Math.max(...allMercY) + padY,
-  };
-}
-
 const BAR_COLORS: Record<string, string> = {
   "bg-secondary": "#00668a",
   "bg-secondary-container": "#40c2fd",
   "bg-tertiary-fixed-dim": "#b7c8e1",
   "bg-primary-fixed-dim": "#bec6e0",
   "bg-surface-variant": "#a0a4a8",
+};
+
+const REGION_FLAGS: Record<string, string> = {
+  "France": "🇫🇷",
+  "Belgique": "🇧🇪",
+  "Allemagne": "🇩🇪",
+  "Italie": "🇮🇹",
+  "Suisse": "🇨🇭",
+  "Turquie": "🇹🇷",
+  "Égypte": "🇪🇬",
+  "Émirats": "🇦🇪",
+  "Qatar": "🇶🇦",
 };
 
 interface DestinationsPageClientProps {
@@ -65,45 +52,19 @@ interface DestinationsPageClientProps {
 export default function DestinationsPageClient({ destinations, allDestinations }: DestinationsPageClientProps) {
   const [selected, setSelected] = useState<string | null>(null);
   const [activeCountry, setActiveCountry] = useState<string>("Tous");
-  const [hovered, setHovered] = useState<string | null>(null);
 
   const countries = useMemo(() => {
-    const set = new Set(allDestinations.map((d) => d.country));
-    return ["Tous", ...Array.from(set).sort()];
+    const map = new Map<string, number>();
+    allDestinations.forEach((d) => {
+      map.set(d.country, (map.get(d.country) || 0) + 1);
+    });
+    return ["Tous", ...Array.from(map.entries()).sort((a, b) => a[0].localeCompare(b[0])).map(([c]) => c)];
   }, [allDestinations]);
 
   const filteredDestinations = useMemo(() => {
     if (activeCountry === "Tous") return allDestinations;
     return allDestinations.filter((d) => d.country === activeCountry);
   }, [allDestinations, activeCountry]);
-
-  const validDests = useMemo(
-    () => filteredDestinations.filter((d) => d.lat !== 0 && d.lng !== 0),
-    [filteredDestinations]
-  );
-
-  const svgW = 800;
-  const svgH = 500;
-  const pad = 50;
-
-  const projBounds = useMemo(() => {
-    const coords: [number, number][] = [...validDests.map((d) => [d.lat, d.lng] as [number, number]), MONASTIR];
-    return computeProjBounds(coords);
-  }, [validDests]);
-
-  const hubXY = useMemo(
-    () => project(MONASTIR[0], MONASTIR[1], projBounds, svgW, svgH, pad),
-    [projBounds]
-  );
-
-  const points = useMemo(
-    () =>
-      validDests.map((d) => ({
-        ...d,
-        xy: project(d.lat, d.lng, projBounds, svgW, svgH, pad),
-      })),
-    [validDests, projBounds]
-  );
 
   const maxPassengers = useMemo(
     () => Math.max(...filteredDestinations.map((d) => d.passengers), 1),
@@ -113,240 +74,162 @@ export default function DestinationsPageClient({ destinations, allDestinations }
   const select = (code: string) => setSelected((prev) => (prev === code ? null : code));
   const reset = () => setSelected(null);
 
-  const selectedDest = selected ? points.find((d) => d.code === selected) : null;
+  const selectedDest = selected ? filteredDestinations.find((d) => d.code === selected) : null;
 
   return (
     <>
-      {/* Map Widget */}
+      {/* Map */}
       <div className="col-span-12 flex flex-col overflow-hidden rounded-xl border border-surface-variant bg-surface-container-lowest shadow-[0px_4px_12px_rgba(15,23,42,0.03)] transition-colors duration-300 hover:border-secondary xl:col-span-8">
-        <div className="relative z-10 flex items-center justify-between border-b border-surface-container bg-surface-container-lowest p-widget-padding">
-          <h3 className="font-headline-sm text-headline-sm text-on-surface">Carte des Lignes (MIR)</h3>
+        <div className="relative z-10 flex items-center justify-between border-b border-surface-container bg-surface-container-lowest px-5 py-3">
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-secondary/10">
+              <span className="material-symbols-outlined text-secondary text-[18px]">map</span>
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-on-surface">Carte des Lignes Aériennes</h3>
+              <p className="text-[11px] text-on-surface-variant">MIR — Monastir International</p>
+            </div>
+          </div>
           <div className="flex items-center gap-2">
             {selected && (
-              <button type="button" onClick={reset} className="font-label-caps text-label-caps text-secondary transition-colors hover:text-on-secondary-container">
-                Réinitialiser
+              <button
+                type="button"
+                onClick={() => { reset(); }}
+                className="rounded-full bg-secondary/10 px-3 py-1 text-[11px] font-medium text-secondary transition-colors hover:bg-secondary/20"
+              >
+                Effacer sélection
               </button>
             )}
-            <span className="rounded bg-surface-container px-2 py-1 font-label-caps text-label-caps text-on-surface-variant">
+            <span className="rounded-full bg-surface-container px-2.5 py-1 text-[11px] font-medium text-on-surface-variant">
               {filteredDestinations.length} destinations
             </span>
           </div>
         </div>
 
-        <div className="relative w-full overflow-hidden bg-[#f2f4f6]" style={{ aspectRatio: "16 / 10" }}>
-          <svg className="absolute inset-0 h-full w-full" viewBox={`0 0 ${svgW} ${svgH}`} preserveAspectRatio="xMidYMid meet">
-            <defs>
-              <filter id="marker-shadow">
-                <feDropShadow dx="0" dy="1" floodColor="#000" floodOpacity="0.3" stdDeviation="2" />
-              </filter>
-            </defs>
+        <div className="h-[520px] w-full">
+          <GoogleMapWidget
+            destinations={filteredDestinations}
+            selected={selected}
+            activeCountry={activeCountry}
+            onSelect={select}
+          />
+        </div>
 
-            {/* Grid lines */}
-            <g stroke="rgba(118,119,125,0.07)" strokeWidth="0.5" strokeDasharray="4 6">
-              {[0.2, 0.4, 0.6, 0.8].map((f) => (
-                <line key={`h${f}`} x1={pad} x2={svgW - pad} y1={pad + (svgH - 2 * pad) * f} y2={pad + (svgH - 2 * pad) * f} />
-              ))}
-              {[0.2, 0.4, 0.6, 0.8].map((f) => (
-                <line key={`v${f}`} x1={pad + (svgW - 2 * pad) * f} x2={pad + (svgW - 2 * pad) * f} y1={pad} y2={svgH - pad} />
-              ))}
-            </g>
-
-            {/* Polylines */}
-            {points.map((d) => {
-              const isActive = selected === d.code || hovered === d.code;
-              const dimmed = selected && selected !== d.code;
-              const midX = (d.xy[0] + hubXY[0]) / 2;
-              const midY = (d.xy[1] + hubXY[1]) / 2 - Math.abs(d.xy[0] - hubXY[0]) * 0.18 - 25;
-              return (
-                <path
-                  key={`arc-${d.code}`}
-                  d={`M${d.xy[0]},${d.xy[1]} Q${midX},${midY} ${hubXY[0]},${hubXY[1]}`}
-                  fill="none"
-                  stroke={isActive ? "#00668a" : "#40c2fd"}
-                  strokeWidth={isActive ? 2.5 : 1.2}
-                  opacity={dimmed ? 0.15 : isActive ? 1 : 0.45}
-                  strokeDasharray={isActive ? "none" : "5 4"}
-                  className="pointer-events-auto cursor-pointer transition-all duration-200"
-                  onClick={() => select(d.code)}
-                  onMouseEnter={() => setHovered(d.code)}
-                  onMouseLeave={() => setHovered(null)}
-                />
-              );
-            })}
-
-            {/* Hub marker */}
-            <circle cx={hubXY[0]} cy={hubXY[1]} r={14} fill="rgba(0,102,138,0.15)" className="animate-pulse" />
-            <circle cx={hubXY[0]} cy={hubXY[1]} r={7} fill="#00668a" filter="url(#marker-shadow)" stroke="#fff" strokeWidth={2} />
-
-            {/* Destination markers */}
-            {points.map((d) => {
-              const isActive = selected === d.code;
-              const dimmed = selected && !isActive;
-              const r = isActive ? 6 : 4.5;
-              return (
-                <g
-                  key={`mk-${d.code}`}
-                  className="pointer-events-auto cursor-pointer"
-                  onClick={() => select(d.code)}
-                  onMouseEnter={() => setHovered(d.code)}
-                  onMouseLeave={() => setHovered(null)}
-                >
-                  <circle cx={d.xy[0]} cy={d.xy[1]} r={r + 6} fill="transparent" />
-                  <circle
-                    cx={d.xy[0]}
-                    cy={d.xy[1]}
-                    r={r}
-                    fill={isActive ? "#40c2fd" : "#131b2e"}
-                    filter="url(#marker-shadow)"
-                    stroke="#fff"
-                    strokeWidth={1.5}
-                    opacity={dimmed ? 0.2 : 1}
-                    className="transition-all duration-200"
-                  />
-                </g>
-              );
-            })}
-          </svg>
-
-          {/* Labels overlay */}
-          <div className="pointer-events-none absolute inset-0">
-            <div
-              className="absolute rounded border border-surface-variant bg-surface-container-lowest/90 px-2 py-1 text-[11px] font-bold text-on-surface shadow-sm backdrop-blur-sm"
-              style={{ left: `${(hubXY[0] / svgW) * 100}%`, top: `${(hubXY[1] / svgH) * 100}%`, transform: "translate(10px, 4px)" }}
-            >
-              MIR
-            </div>
-            {points.map((d) => {
-              const isActive = selected === d.code || hovered === d.code;
-              const dimmed = selected && selected !== d.code;
-              return (
-                <div
-                  key={`lbl-${d.code}`}
-                  className="pointer-events-auto absolute cursor-pointer rounded border px-2 py-0.5 text-[10px] font-medium shadow-sm backdrop-blur transition-all duration-200"
-                  style={{
-                    left: `${(d.xy[0] / svgW) * 100}%`,
-                    top: `${(d.xy[1] / svgH) * 100}%`,
-                    transform: "translate(8px, -14px)",
-                    background: isActive ? "#00668a" : "rgba(255,255,255,0.92)",
-                    color: isActive ? "#fff" : "#131b2e",
-                    borderColor: isActive ? "#00668a" : "rgba(0,0,0,0.08)",
-                    opacity: dimmed ? 0.15 : 1,
-                    whiteSpace: "nowrap",
-                  }}
-                  onClick={() => select(d.code)}
-                  onMouseEnter={() => setHovered(d.code)}
-                  onMouseLeave={() => setHovered(null)}
-                >
-                  {d.city}
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Info overlay */}
-          {selectedDest && (
-            <div className="absolute bottom-3 left-3 z-10 rounded-lg border border-outline-variant bg-surface-container-lowest/95 px-4 py-3 shadow-lg backdrop-blur-sm">
+        {/* Selected info bar */}
+        {selectedDest && (
+          <div className="border-t border-surface-container bg-surface-container-lowest/95 px-5 py-3 backdrop-blur-sm">
+            <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary text-on-secondary text-xs font-bold">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary text-[11px] font-bold text-white">
                   {selectedDest.rank}
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-on-surface">{selectedDest.city} ({selectedDest.code})</p>
-                  <p className="text-xs text-on-surface-variant">{selectedDest.country}</p>
-                  <p className="text-sm font-semibold text-secondary">
-                    {selectedDest.passengers.toLocaleString("fr-FR")} pax
-                  </p>
+                  <span className="text-sm font-semibold text-on-surface">{selectedDest.city}</span>
+                  <span className="ml-1.5 rounded bg-surface-container px-1.5 py-0.5 text-[10px] font-mono text-on-surface-variant">{selectedDest.code}</span>
+                  <span className="ml-2 text-xs text-on-surface-variant">{selectedDest.country}</span>
                 </div>
               </div>
+              <div className="text-right">
+                <span className="text-sm font-bold text-secondary">{selectedDest.passengers.toLocaleString("fr-FR")}</span>
+                <span className="ml-1 text-xs text-on-surface-variant">passagers</span>
+              </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Sidebar */}
       <div className="col-span-12 flex flex-col rounded-xl border border-surface-variant bg-surface-container-lowest shadow-[0px_4px_12px_rgba(15,23,42,0.03)] xl:col-span-4">
-        <div className="border-b border-surface-container p-widget-padding">
-          <h4 className="font-label-caps text-label-caps text-on-surface-variant mb-3">Filtrer par Pays</h4>
-          <div className="flex flex-wrap gap-2">
+        {/* Region filter */}
+        <div className="border-b border-surface-container p-4">
+          <h4 className="mb-3 text-[10px] font-semibold uppercase tracking-wider text-on-surface-variant">Régions</h4>
+          <div className="flex flex-wrap gap-1.5">
             {countries.map((country) => {
               const count = country === "Tous" ? allDestinations.length : allDestinations.filter((d) => d.country === country).length;
+              const isActive = activeCountry === country;
               return (
                 <button
                   key={country}
                   type="button"
                   onClick={() => { setActiveCountry(country); setSelected(null); }}
-                  className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200 ${
-                    activeCountry === country
-                      ? "bg-secondary text-on-secondary shadow-sm"
-                      : "bg-surface-container text-on-surface-variant hover:bg-surface-variant"
+                  className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-medium transition-all duration-200 ${
+                    isActive
+                      ? "bg-secondary text-on-secondary shadow-sm ring-1 ring-secondary/20"
+                      : "bg-surface-container text-on-surface-variant hover:bg-surface-variant hover:text-on-surface"
                   }`}
                 >
-                  {country} <span className="ml-1 opacity-70">({count})</span>
+                  {REGION_FLAGS[country] && <span className="text-[13px]">{REGION_FLAGS[country]}</span>}
+                  {country}
+                  <span className={`ml-0.5 text-[9px] ${isActive ? "text-on-secondary/70" : "text-on-surface-variant/60"}`}>{count}</span>
                 </button>
               );
             })}
           </div>
         </div>
 
-        <div className="flex items-center justify-between p-widget-padding pb-2">
+        {/* List header */}
+        <div className="flex items-center justify-between px-4 pt-3 pb-2">
           <div>
-            <h3 className="font-headline-sm text-headline-sm text-on-surface">Destinations</h3>
-            <p className="mt-1 text-xs text-on-surface-variant">
-              {activeCountry === "Tous" ? "Toutes les destinations" : activeCountry} — Volume de passagers
+            <h3 className="text-sm font-semibold text-on-surface">Destinations</h3>
+            <p className="text-[11px] text-on-surface-variant">
+              {activeCountry === "Tous" ? "Toutes les destinations" : activeCountry}
             </p>
           </div>
           {selected && (
-            <button type="button" onClick={reset} className="text-xs font-medium text-secondary hover:text-secondary-container">
-              Réinitialiser
+            <button type="button" onClick={reset} className="text-[11px] font-medium text-secondary hover:text-secondary-container">
+              Tout afficher
             </button>
           )}
         </div>
 
-        <div className="flex flex-1 flex-col gap-2 overflow-y-auto px-widget-padding pb-widget-padding">
-          {filteredDestinations.map((d) => (
-            <div
-              key={d.code}
-              className={`cursor-pointer rounded-lg border p-3 transition-all duration-200 ${
-                selected === d.code
-                  ? "border-secondary bg-secondary/5 shadow-sm"
-                  : "border-transparent hover:bg-surface-container"
-              }`}
-              style={{ opacity: selected && selected !== d.code ? 0.4 : 1 }}
-              onClick={() => select(d.code)}
-            >
-              <div className="mb-1.5 flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <div
-                    className="flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold text-white"
-                    style={{ background: BAR_COLORS[d.barColor] || "#00668a" }}
-                  >
-                    {d.rank}
+        {/* Destinations list */}
+        <div className="flex flex-1 flex-col gap-1 overflow-y-auto px-3 pb-3" style={{ maxHeight: "calc(520px - 120px)" }}>
+          {filteredDestinations.map((d) => {
+            const isActive = selected === d.code;
+            return (
+              <div
+                key={d.code}
+                className={`group cursor-pointer rounded-lg border p-2.5 transition-all duration-150 ${
+                  isActive
+                    ? "border-secondary/30 bg-secondary/5 shadow-sm"
+                    : "border-transparent hover:bg-surface-container"
+                }`}
+                style={{ opacity: selected && !isActive ? 0.35 : 1 }}
+                onClick={() => select(d.code)}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold text-white transition-transform duration-150 group-hover:scale-110"
+                      style={{ background: BAR_COLORS[d.barColor] || "#00668a" }}
+                    >
+                      {d.rank}
+                    </div>
+                    <div className="leading-tight">
+                      <span className="block text-[13px] font-medium text-on-surface">{d.city}</span>
+                      <span className="text-[10px] text-on-surface-variant">{d.code} · {d.country}</span>
+                    </div>
                   </div>
-                  <div>
-                    <span className="block text-sm font-medium text-on-surface">{d.city} ({d.code})</span>
-                    <span className="text-[10px] uppercase text-on-surface-variant">{d.country}</span>
-                  </div>
+                  <span className="text-right font-mono text-[11px] text-on-surface">
+                    {d.passengers.toLocaleString("fr-FR")}
+                    <span className="ml-0.5 text-[9px] text-on-surface-variant">pax</span>
+                  </span>
                 </div>
-                <span className="font-mono text-xs text-on-surface">
-                  {d.passengers.toLocaleString("fr-FR")} <span className="text-on-surface-variant">pax</span>
-                </span>
+                <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-surface-container">
+                  <div
+                    className="h-full rounded-full transition-all duration-500"
+                    style={{
+                      width: `${(d.passengers / maxPassengers) * 100}%`,
+                      background: BAR_COLORS[d.barColor] || "#00668a",
+                    }}
+                  />
+                </div>
               </div>
-              <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-container">
-                <div
-                  className="h-full rounded-full transition-all duration-500"
-                  style={{
-                    width: `${(d.passengers / maxPassengers) * 100}%`,
-                    background: BAR_COLORS[d.barColor] || "#00668a",
-                  }}
-                />
-              </div>
-            </div>
-          ))}
+            );
+          })}
 
           {filteredDestinations.length === 0 && (
-            <div className="py-8 text-center text-sm text-on-surface-variant">
-              Aucune destination pour ce pays.
-            </div>
+            <div className="py-10 text-center text-sm text-on-surface-variant">Aucune destination</div>
           )}
         </div>
       </div>
