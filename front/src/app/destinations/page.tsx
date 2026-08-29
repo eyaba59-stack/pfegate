@@ -13,7 +13,7 @@ interface DestinationsPageProps {
 
 export default async function DestinationsPage({ searchParams }: DestinationsPageProps) {
   const date = searchParams.date;
-  const { topDestinations, allDestinations } = await container.getDestinationAnalysis.execute(date);
+  const { topDestinations, allDestinations, trafficByRegion } = await container.getDestinationAnalysis.execute(date);
 
   return (
     <AppShell title="Monastir International Airport">
@@ -45,12 +45,12 @@ export default async function DestinationsPage({ searchParams }: DestinationsPag
 
         <Reveal animation="fade-up" delay={100}>
           <div className="grid grid-cols-12 gap-section-gap">
-            <DestinationsPageClient destinations={topDestinations} allDestinations={allDestinations} />
+            <DestinationsPageClient destinations={topDestinations} allDestinations={allDestinations} trafficByRegion={trafficByRegion} />
           </div>
         </Reveal>
 
         <Reveal animation="fade-in" delay={300}>
-          <footer className="mt-section-gap border-t border-surface-variant py-6 text-center font-label-caps text-label-caps text-on-surface-variant">
+          <footer className="mt-section-gap py-6 text-center text-label-caps font-label-caps text-on-surface-variant border-t border-surface-variant">
             Données consolidées depuis le système AODB. Mise à jour: il y a 5 minutes.
           </footer>
         </Reveal>
