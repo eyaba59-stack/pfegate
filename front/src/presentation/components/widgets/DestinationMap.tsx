@@ -97,35 +97,32 @@ export default function DestinationMap({ destinations, selected, onSelect }: Des
   const zoomOut = useCallback(() => setZoom((z) => Math.max(MIN_ZOOM, z - ZOOM_STEP)), []);
 
   return (
-    <div className="flex-1 relative w-full h-full bg-[#f2f4f6] overflow-hidden border-t">
-      {/* Professional Vector Base Map */}
-      <div className="absolute inset-0 bg-[#e5e7eb] overflow-hidden">
+    <div className="flex-1 relative w-full h-full bg-surface-container-low overflow-hidden border-t">
+      {/* Geographic Base Map */}
+      <div className="absolute inset-0 bg-[#d8dadc] overflow-hidden">
         <img
-          alt="Detailed Vector Map Base"
-          className="w-full h-full object-cover opacity-40 mix-blend-multiply grayscale"
-          src="https://lh3.googleusercontent.com/aida-public/AB6AXuBWjnrzvUlmLoXOlFF5D69RB8CsezgTepLCItGb5_Xk8M_9v61bj7wVKqr3q1zzxxyNXIUO0GWKZ1nVYRwp12Q0ETXxEp2cFCBIfDdEb9Q9G0JUdOI1k0qRzfnjMJs5nfmBMEx6rmbGgI_oGNIA_NVQmewo03RYg0IzmoCHCZMk-Od6GiufGiBoFWyqfye4ESw35S82zKFpusHL3oknACBvY7XcX7hiVWqr50R1AC7QCNZ8hk7Gp4mQWg"
+          alt="Geographic Map Base"
+          className="w-full h-full object-cover opacity-40 mix-blend-multiply"
+          src="https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&q=80&w=1200"
           style={{ transform: `scale(${zoom})`, transformOrigin: "center center", transition: "transform 0.3s ease" }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-surface-container-low to-transparent opacity-50 pointer-events-none" />
-        <svg className="absolute inset-0 w-full h-full pointer-events-none" preserveAspectRatio="xMidYMid slice" viewBox="0 0 800 500"
+        <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 800 500"
           style={{ transform: `scale(${zoom})`, transformOrigin: "center center", transition: "transform 0.3s ease" }}>
-          <g stroke="rgba(118, 119, 125, 0.1)" strokeWidth="1">
-            {[100, 200, 300, 400].map((y) => (
-              <line key={`h${y}`} x1="0" x2="800" y1={y} y2={y} />
-            ))}
-            {[200, 400, 600].map((x) => (
-              <line key={`v${x}`} x1={x} x2={x} y1="0" y2="500" />
-            ))}
-          </g>
+          <path d="M350,450 L380,430 L420,440 L450,480 L400,500 Z" fill="none" stroke="#76777d" strokeWidth="0.5" className="opacity-50" />
+          <path d="M200,100 L300,50 L450,80 L500,150 L400,250 L300,300 L200,250 Z" fill="none" stroke="#76777d" strokeWidth="0.5" className="opacity-50" />
         </svg>
       </div>
 
       {/* Flight Arcs + Markers */}
-      <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="xMidYMid slice" viewBox="0 0 800 500"
+      <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 800 500"
         style={{ transform: `scale(${zoom})`, transformOrigin: "center center", transition: "transform 0.3s ease" }}>
         <defs>
+          <linearGradient id="arcGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+            <stop offset="0%" style={{ stopColor: "#00668a", stopOpacity: 0.8 }} />
+            <stop offset="100%" style={{ stopColor: "#40c2fd", stopOpacity: 1 }} />
+          </linearGradient>
           <filter id="glow">
-            <feGaussianBlur result="blur" stdDeviation="1.5" />
+            <feGaussianBlur stdDeviation="2" result="blur" />
             <feComposite in="SourceGraphic" in2="blur" operator="over" />
           </filter>
           <filter id="marker-shadow">
@@ -139,10 +136,11 @@ export default function DestinationMap({ destinations, selected, onSelect }: Des
               <path
                 d={arcPath(hub.x, hub.y, d.x, d.y)}
                 fill="none"
-                stroke={isActive ? "rgba(0, 102, 138, 0.6)" : "rgba(0, 102, 138, 0.15)"}
-                strokeWidth={isActive ? 2 : 1}
+                stroke={isActive ? "url(#arcGrad)" : "rgba(0, 102, 138, 0.15)"}
+                strokeWidth={isActive ? 2.5 : 1}
                 strokeDasharray={isActive ? "none" : "4 4"}
-                className="transition-all duration-300"
+                filter={isActive ? "url(#glow)" : undefined}
+                className="transition-all duration-300 opacity-90"
               />
               <circle
                 cx={d.x}
@@ -208,13 +206,13 @@ export default function DestinationMap({ destinations, selected, onSelect }: Des
       <div className="absolute bottom-4 right-4 flex flex-col gap-2 z-10">
         <button
           onClick={zoomIn}
-          className="w-10 h-10 bg-surface-container-lowest rounded-t-lg shadow-md flex items-center justify-center text-on-surface hover:bg-surface-variant transition-colors border border-outline-variant border-b-0"
+          className="w-10 h-10 bg-surface-container-lowest rounded-lg shadow-md flex items-center justify-center text-on-surface hover:bg-surface-variant transition-colors border border-outline-variant"
         >
           <span className="material-symbols-outlined">add</span>
         </button>
         <button
           onClick={zoomOut}
-          className="w-10 h-10 bg-surface-container-lowest rounded-b-lg shadow-md flex items-center justify-center text-on-surface hover:bg-surface-variant transition-colors border border-outline-variant"
+          className="w-10 h-10 bg-surface-container-lowest rounded-lg shadow-md flex items-center justify-center text-on-surface hover:bg-surface-variant transition-colors border border-outline-variant"
         >
           <span className="material-symbols-outlined">remove</span>
         </button>
