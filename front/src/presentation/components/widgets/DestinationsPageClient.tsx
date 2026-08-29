@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import dynamic from "next/dynamic";
 import type { Destination, RegionTraffic } from "@/core/domain/entities/Destination";
-import GroupedBarChart from "./GroupedBarChart";
+import RegionTrafficChart from "./RegionTrafficChart";
 
 const DestinationMap = dynamic(() => import("./DestinationMap"), {
   ssr: false,
@@ -33,23 +33,11 @@ export default function DestinationsPageClient({ destinations, allDestinations, 
 
   const formatPax = (n: number) => n.toLocaleString("fr-FR");
 
-  const regionGroups = useMemo(
-    () =>
-      trafficByRegion.map((r) => ({
-        label: r.region,
-        valueA: r.q1,
-        valueB: r.q2,
-        colorA: "#00668a",
-        colorB: "#40c2fd",
-      })),
-    [trafficByRegion]
-  );
-
   return (
     <>
       {/* Row 1: Map (8 cols) + Top 5 List (4 cols) */}
       <div className="col-span-12 xl:col-span-8 bg-surface-container-lowest border border-surface-variant rounded-xl shadow-[0px_4px_12px_rgba(15,23,42,0.03)] flex flex-col h-[500px] overflow-hidden group hover:border-secondary transition-colors duration-300">
-        <div className="p-widget-padding border-b border-surface-container flex justify-between items-center bg-surface-container-lowest z-10 relative">
+        <div className="p-widget-padding border-b border-surface-container flex justify-between items-center bg-surface-container-lowest z-10">
           <h3 className="text-headline-sm font-headline-sm text-on-surface">Carte des Lignes (MIR)</h3>
           <div className="flex gap-2">
             <span className="px-2 py-1 bg-surface-container text-on-surface-variant rounded text-label-caps font-label-caps">Temps Réel</span>
@@ -59,33 +47,15 @@ export default function DestinationsPageClient({ destinations, allDestinations, 
       </div>
 
       <div className="col-span-12 xl:col-span-4 bg-surface-container-lowest border border-surface-variant rounded-xl shadow-[0px_4px_12px_rgba(15,23,42,0.03)] flex flex-col h-[500px]">
-        <div className="p-widget-padding border-b border-surface-container flex justify-between items-center">
-          <div>
-            <h3 className="text-headline-sm font-headline-sm text-on-surface">Top 5 Destinations</h3>
-            <p className="text-body-sm font-body-sm text-on-surface-variant mt-1">Volume de passagers (30 derniers jours)</p>
-          </div>
-          {selected && (
-            <button
-              type="button"
-              onClick={() => setSelected(null)}
-              className="text-label-caps font-label-caps text-secondary hover:text-on-secondary-container transition-colors"
-            >
-              Réinitialiser
-            </button>
-          )}
+        <div className="p-widget-padding border-b border-surface-container">
+          <h3 className="text-headline-sm font-headline-sm text-on-surface">Top 5 Destinations</h3>
+          <p className="text-body-sm font-body-sm text-on-surface-variant mt-1">Volume de passagers (30 derniers jours)</p>
         </div>
-        <div className="p-widget-padding flex-1 flex flex-col gap-4 overflow-y-auto" id="dest-list">
+        <div className="p-widget-padding flex-1 flex flex-col gap-6 overflow-y-auto">
           {top5.map((d) => {
-            const isActive = selected === d.code;
+            const pctWidth = Math.round((d.passengers / maxPax) * 100);
             return (
-              <div
-                key={d.code}
-                className={`dest-item cursor-pointer transition-all duration-300 border-2 border-transparent rounded-lg p-2 ${
-                  isActive ? "highlighted" : ""
-                }`}
-                style={{ opacity: selected && !isActive ? 0.4 : 1 }}
-                onClick={() => setSelected(isActive ? null : d.code)}
-              >
+              <div key={d.code}>
                 <div className="flex justify-between items-end mb-2">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-on-surface font-bold text-body-sm">
@@ -102,8 +72,8 @@ export default function DestinationsPageClient({ destinations, allDestinations, 
                 </div>
                 <div className="w-full bg-surface-container h-2 rounded-full overflow-hidden">
                   <div
-                    className={`${getBarColor(d.rank)} h-full rounded-full transition-all duration-500`}
-                    style={{ width: `${(d.passengers / maxPax) * 100}%` }}
+                    className={`${getBarColor(d.rank)} h-full rounded-full`}
+                    style={{ width: `${pctWidth}%` }}
                   />
                 </div>
               </div>
@@ -119,9 +89,19 @@ export default function DestinationsPageClient({ destinations, allDestinations, 
             <h3 className="text-headline-sm font-headline-sm text-on-surface">Évolution du Trafic par Région</h3>
             <p className="text-body-sm font-body-sm text-on-surface-variant mt-1">Comparaison trimestrielle des volumes (Vols)</p>
           </div>
+          <div className="flex gap-4">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded bg-secondary"></div>
+              <span className="text-label-caps font-label-caps text-on-surface-variant">Q1</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded bg-secondary-container"></div>
+              <span className="text-label-caps font-label-caps text-on-surface-variant">Q2</span>
+            </div>
+          </div>
         </div>
-        {regionGroups.length > 0 ? (
-          <GroupedBarChart groups={regionGroups} legendA="Q1" legendB="Q2" height={256} />
+        {trafficByRegion.length > 0 ? (
+          <RegionTrafficChart data={trafficByRegion} />
         ) : (
           <div className="flex h-64 items-center justify-center text-on-surface-variant">
             Aucune donnée de trafic par région disponible.
