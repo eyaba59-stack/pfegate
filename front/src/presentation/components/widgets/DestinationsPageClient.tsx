@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import dynamic from "next/dynamic";
-import type { Destination, RegionTraffic } from "@/core/domain/entities/Destination";
+import type { Destination } from "@/core/domain/entities/Destination";
 
 const DestinationMap = dynamic(() => import("./DestinationMap"), {
   ssr: false,
@@ -16,10 +16,9 @@ const DestinationMap = dynamic(() => import("./DestinationMap"), {
 interface DestinationsPageClientProps {
   destinations: Destination[];
   allDestinations: Destination[];
-  trafficByRegion: RegionTraffic[];
 }
 
-export default function DestinationsPageClient({ destinations, allDestinations, trafficByRegion }: DestinationsPageClientProps) {
+export default function DestinationsPageClient({ destinations, allDestinations }: DestinationsPageClientProps) {
   const [selected, setSelected] = useState<string | null>(null);
 
   const sortedAll = useMemo(
@@ -29,15 +28,6 @@ export default function DestinationsPageClient({ destinations, allDestinations, 
 
   const top5 = sortedAll.slice(0, 5);
   const maxPax = top5[0]?.passengers || 1;
-
-  const maxRegion = useMemo(() => {
-    let max = 1;
-    trafficByRegion.forEach((r) => {
-      if (r.q1 > max) max = r.q1;
-      if (r.q2 > max) max = r.q2;
-    });
-    return max;
-  }, [trafficByRegion]);
 
   const formatPax = (n: number) => n.toLocaleString("fr-FR");
 
@@ -109,61 +99,6 @@ export default function DestinationsPageClient({ destinations, allDestinations, 
       </div>
 
       {/* Row 2: Traffic Evolution Chart (12 cols) */}
-      <div className="col-span-12 bg-surface-container-lowest border border-surface-variant rounded-xl shadow-[0px_4px_12px_rgba(15,23,42,0.03)] p-widget-padding">
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h3 className="text-headline-sm font-headline-sm text-on-surface">Évolution du Trafic par Région</h3>
-            <p className="text-body-sm font-body-sm text-on-surface-variant mt-1">Comparaison trimestrielle des volumes (Vols)</p>
-          </div>
-          <div className="flex gap-4">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded bg-secondary" />
-              <span className="text-label-caps font-label-caps text-on-surface-variant">Q1</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded bg-secondary-container" />
-              <span className="text-label-caps font-label-caps text-on-surface-variant">Q2</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Custom Bar Chart matching HTML mockup */}
-        <div className="h-64 flex items-end justify-between gap-4 border-b border-surface-container pb-2 px-2 relative">
-          {/* Y Axis Labels */}
-          <div className="absolute left-0 top-0 h-full flex flex-col justify-between text-label-caps font-label-caps text-on-surface-variant -ml-8">
-            <span>{formatPax(Math.ceil(maxRegion / 1000) * 1000)}</span>
-            <span>{formatPax(Math.ceil(maxRegion / 2000) * 1000)}</span>
-            <span>0</span>
-          </div>
-          {/* Grid lines */}
-          <div className="absolute left-0 top-0 w-full border-t border-surface-container border-dashed" />
-          <div className="absolute left-0 top-1/2 w-full border-t border-surface-container border-dashed" />
-
-          {trafficByRegion.map((r) => (
-            <div key={r.region} className="flex-1 flex flex-col items-center gap-2 z-10 group cursor-pointer">
-              <div className="flex items-end gap-1 h-48 w-full justify-center">
-                <div
-                  className="w-8 bg-secondary rounded-t-sm group-hover:opacity-90 transition-opacity relative"
-                  style={{ height: `${(r.q1 / maxRegion) * 100}%` }}
-                >
-                  <div className="hidden group-hover:block absolute -top-8 left-1/2 -translate-x-1/2 bg-inverse-surface text-inverse-on-surface text-label-caps px-2 py-1 rounded whitespace-nowrap">
-                    {formatPax(r.q1)}
-                  </div>
-                </div>
-                <div
-                  className="w-8 bg-secondary-container rounded-t-sm group-hover:opacity-90 transition-opacity relative"
-                  style={{ height: `${(r.q2 / maxRegion) * 100}%` }}
-                >
-                  <div className="hidden group-hover:block absolute -top-8 left-1/2 -translate-x-1/2 bg-inverse-surface text-inverse-on-surface text-label-caps px-2 py-1 rounded whitespace-nowrap">
-                    {formatPax(r.q2)}
-                  </div>
-                </div>
-              </div>
-              <span className="text-body-sm font-body-sm text-on-surface font-medium">{r.region}</span>
-            </div>
-          ))}
-        </div>
-      </div>
     </>
   );
 }
