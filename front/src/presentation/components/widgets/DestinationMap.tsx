@@ -51,13 +51,12 @@ function arcPath(x1: number, y1: number, x2: number, y2: number): string {
   return `M ${x1} ${y1} Q ${cx} ${cy} ${x2} ${y2}`;
 }
 
-const DEST_COLORS = ["#00668a", "#40c2fd", "#3b82f6", "#6366f1", "#8b5cf6", "#a855f7", "#ec4899", "#f43f5e", "#f97316", "#eab308"];
-
 function formatPax(n: number): string {
   return n.toLocaleString("fr-FR");
 }
 
 export default function DestinationMap({ destinations, selected, onSelect }: DestinationMapProps) {
+  const [hovered, setHovered] = useState<string | null>(null);
   const bounds = useMemo(() => computeBounds(destinations), [destinations]);
   const hub = useMemo(() => project(MIR.lat, MIR.lng, bounds), [bounds]);
 
@@ -66,7 +65,7 @@ export default function DestinationMap({ destinations, selected, onSelect }: Des
     [destinations, bounds]
   );
 
-  const selectedDest = useMemo(() => projected.find((d) => d.code === selected), [projected, selected]);
+  const activeCode = selected || hovered;
 
   const handleClick = useCallback(
     (code: string) => onSelect(selected === code ? null : code),
@@ -74,137 +73,114 @@ export default function DestinationMap({ destinations, selected, onSelect }: Des
   );
 
   return (
-    <div className="relative h-full w-full bg-[#f2f4f6] overflow-hidden flex flex-col">
-      <div className="flex-1 relative">
-        {/* Grid background */}
-        <svg className="absolute inset-0 h-full w-full" viewBox="0 0 800 460">
-          <defs>
-            <filter id="marker-shadow">
-              <feDropShadow dx="0" dy="2" floodColor="#000000" floodOpacity="0.3" stdDeviation="2" />
-            </filter>
-          </defs>
+    <div className="flex-1 relative w-full h-full bg-[#f2f4f6] overflow-hidden border-t">
+      {/* Professional Vector Base Map */}
+      <div className="absolute inset-0 bg-[#e5e7eb] overflow-hidden">
+        <img
+          alt="Detailed Vector Map Base"
+          className="w-full h-full object-cover opacity-40 mix-blend-multiply grayscale"
+          src="https://lh3.googleusercontent.com/aida-public/AB6AXuBWjnrzvUlmLoXOlFF5D69RB8CsezgTepLCItGb5_Xk8M_9v61bj7wVKqr3q1zzxxyNXIUO0GWKZ1nVYRwp12Q0ETXxEp2cFCBIfDdEb9Q9G0JUdOI1k0qRzfnjMJs5nfmBMEx6rmbGgI_oGNIA_NVQmewo03RYg0IzmoCHCZMk-Od6GiufGiBoFWyqfye4ESw35S82zKFpusHL3oknACBvY7XcX7hiVWqr50R1AC7QCNZ8hk7Gp4mQWg"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-surface-container-low to-transparent opacity-50 pointer-events-none" />
+        <svg className="absolute inset-0 w-full h-full pointer-events-none" preserveAspectRatio="xMidYMid slice" viewBox="0 0 800 500">
           <g stroke="rgba(118, 119, 125, 0.1)" strokeWidth="1">
             {[100, 200, 300, 400].map((y) => (
               <line key={`h${y}`} x1="0" x2="800" y1={y} y2={y} />
             ))}
             {[200, 400, 600].map((x) => (
-              <line key={`v${x}`} x1={x} x2={x} y1="0" y2="460" />
+              <line key={`v${x}`} x1={x} x2={x} y1="0" y2="500" />
             ))}
           </g>
         </svg>
-
-        {/* Flight arcs + markers + labels */}
-        <svg className="absolute inset-0 h-full w-full" viewBox="0 0 800 460">
-          {projected.map((d, i) => {
-            const isActive = selected === d.code;
-            const isHovered = !selected && false;
-            const color = DEST_COLORS[i % DEST_COLORS.length];
-            return (
-              <g key={d.code}>
-                {/* Arc */}
-                <path
-                  d={arcPath(hub.x, hub.y, d.x, d.y)}
-                  fill="none"
-                  stroke={isActive ? color : "rgba(0, 102, 138, 0.2)"}
-                  strokeWidth={isActive ? 2.5 : 1}
-                  strokeDasharray={isActive ? "none" : "4 4"}
-                  className="transition-all duration-300"
-                />
-                {/* Marker */}
-                <circle
-                  cx={d.x}
-                  cy={d.y}
-                  fill={isActive ? color : "#131b2e"}
-                  r={isActive ? 7 : 5}
-                  stroke="#ffffff"
-                  strokeWidth={isActive ? 2.5 : 1.5}
-                  filter="url(#marker-shadow)"
-                  className="cursor-pointer transition-all duration-300"
-                  onClick={() => handleClick(d.code)}
-                  style={{ filter: isActive ? `drop-shadow(0 0 8px ${color})` : undefined }}
-                />
-                {/* Label always visible */}
-                <g
-                  className="cursor-pointer"
-                  onClick={() => handleClick(d.code)}
-                >
-                  <rect
-                    x={d.x - 4}
-                    y={d.y - 24}
-                    width={d.city.length * 7 + 40}
-                    height={20}
-                    rx={4}
-                    fill={isActive ? color : "#131b2e"}
-                    fillOpacity={isActive ? 1 : 0.85}
-                    className="transition-all duration-300"
-                  />
-                  <text
-                    x={d.x + 2}
-                    y={d.y - 11}
-                    fill="white"
-                    fontSize="11"
-                    fontWeight="600"
-                    fontFamily="Inter, sans-serif"
-                    className="pointer-events-none select-none"
-                  >
-                    {d.city}
-                  </text>
-                </g>
-              </g>
-            );
-          })}
-
-          {/* Monastir hub */}
-          <g className="pointer-events-none">
-            <circle className="animate-ping" cx={hub.x} cy={hub.y} fill="rgba(0, 102, 138, 0.2)" r="16" />
-            <circle cx={hub.x} cy={hub.y} fill="#00668a" filter="url(#marker-shadow)" r="8" stroke="#ffffff" strokeWidth="2" />
-          </g>
-          {/* Hub label */}
-          <rect x={hub.x - 4} y={hub.y + 12} width={110} height={20} rx={4} fill="#00668a" fillOpacity={0.9} />
-          <text x={hub.x + 2} y={hub.y + 25} fill="white" fontSize="11" fontWeight="700" fontFamily="Inter, sans-serif">
-            MIR (Monastir)
-          </text>
-        </svg>
       </div>
 
-      {/* Selected destination detail panel */}
-      {selectedDest && (
-        <div className="absolute bottom-0 left-0 right-0 bg-surface-container-lowest/95 backdrop-blur-md border-t border-surface-variant px-5 py-3 z-20">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div
-                className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-body-md"
-                style={{ backgroundColor: DEST_COLORS[projected.indexOf(selectedDest) % DEST_COLORS.length] }}
-              >
-                {selectedDest.rank}
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-headline-sm font-headline-sm text-on-surface">{selectedDest.city}</span>
-                  <span className="rounded bg-surface-container px-2 py-0.5 text-label-caps font-label-caps text-on-surface-variant font-mono">{selectedDest.code}</span>
-                </div>
-                <span className="text-body-sm text-on-surface-variant">{selectedDest.country}</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-6">
-              <div className="text-right">
-                <div className="text-headline-sm font-headline-sm text-secondary">{formatPax(selectedDest.passengers)}</div>
-                <div className="text-label-caps font-label-caps text-on-surface-variant">passagers</div>
-              </div>
-              <div className="text-right">
-                <div className="text-headline-sm font-headline-sm text-on-surface">{selectedDest.sharePercent}%</div>
-                <div className="text-label-caps font-label-caps text-on-surface-variant">part</div>
-              </div>
-              <button
-                onClick={() => onSelect(null)}
-                className="ml-2 w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:bg-surface-variant transition-colors"
-              >
-                <span className="material-symbols-outlined text-[18px]">close</span>
-              </button>
-            </div>
-          </div>
+      {/* Flight Arcs + Markers */}
+      <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="xMidYMid slice" viewBox="0 0 800 500">
+        <defs>
+          <filter id="glow">
+            <feGaussianBlur result="blur" stdDeviation="1.5" />
+            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+          </filter>
+          <filter id="marker-shadow">
+            <feDropShadow dx="0" dy="2" floodColor="#000000" floodOpacity="0.3" stdDeviation="2" />
+          </filter>
+        </defs>
+        {projected.map((d, i) => {
+          const isActive = activeCode === d.code;
+          return (
+            <g key={d.code}>
+              <path
+                d={arcPath(hub.x, hub.y, d.x, d.y)}
+                fill="none"
+                stroke={isActive ? "rgba(0, 102, 138, 0.6)" : "rgba(0, 102, 138, 0.15)"}
+                strokeWidth={isActive ? 2 : 1}
+                strokeDasharray={isActive ? "none" : "4 4"}
+                className="transition-all duration-300"
+              />
+              <circle
+                cx={d.x}
+                cy={d.y}
+                fill={isActive ? "#40c2fd" : "#131b2e"}
+                r={isActive ? 7 : 5}
+                stroke="#ffffff"
+                strokeWidth={isActive ? 2 : 1.5}
+                filter="url(#marker-shadow)"
+                className="map-marker cursor-pointer transition-all duration-300"
+                style={{ transformOrigin: `${d.x}px ${d.y}px`, transform: isActive ? "scale(1.2)" : "scale(1)", filter: isActive ? "drop-shadow(0 0 8px rgba(64, 194, 253, 0.8))" : undefined }}
+                onClick={() => handleClick(d.code)}
+                onMouseEnter={() => setHovered(d.code)}
+                onMouseLeave={() => setHovered(null)}
+              />
+            </g>
+          );
+        })}
+
+        {/* Monastir Hub */}
+        <g className="pointer-events-none">
+          <circle className="animate-ping" cx={hub.x} cy={hub.y} fill="rgba(0, 102, 138, 0.2)" r="16" />
+          <circle cx={hub.x} cy={hub.y} fill="#00668a" filter="url(#marker-shadow)" r="8" stroke="#ffffff" strokeWidth="2" />
+        </g>
+      </svg>
+
+      {/* Data Labels (HTML divs matching the HTML mockup) */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div
+          className="absolute text-body-sm font-bold text-on-surface bg-surface-container-lowest/90 backdrop-blur-sm px-2 py-1 rounded shadow-sm border border-surface-variant pointer-events-auto"
+          style={{ top: `${(hub.y / 500) * 100}%`, left: `${(hub.x / 800) * 100}%` }}
+        >
+          MIR (Monastir)
         </div>
-      )}
+        {projected.map((d) => {
+          const isActive = activeCode === d.code;
+          return (
+            <div
+              key={d.code}
+              className={`map-label absolute bg-primary-container/95 backdrop-blur text-on-primary px-3 py-1.5 rounded-lg shadow-md text-body-sm font-medium border border-outline-variant/30 pointer-events-auto cursor-pointer transition-all duration-300 ${
+                isActive ? "selected" : ""
+              }`}
+              style={{
+                top: `${((d.y - 30) / 500) * 100}%`,
+                left: `${((d.x - 40) / 800) * 100}%`,
+              }}
+              onClick={() => handleClick(d.code)}
+              onMouseEnter={() => setHovered(d.code)}
+              onMouseLeave={() => setHovered(null)}
+            >
+              {d.city}: {formatPax(d.passengers)}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Zoom Controls */}
+      <div className="absolute bottom-4 right-4 flex flex-col gap-2 z-10">
+        <button className="w-10 h-10 bg-surface-container-lowest rounded-t-lg shadow-md flex items-center justify-center text-on-surface hover:bg-surface-variant transition-colors border border-outline-variant border-b-0">
+          <span className="material-symbols-outlined">add</span>
+        </button>
+        <button className="w-10 h-10 bg-surface-container-lowest rounded-b-lg shadow-md flex items-center justify-center text-on-surface hover:bg-surface-variant transition-colors border border-outline-variant">
+          <span className="material-symbols-outlined">remove</span>
+        </button>
+      </div>
     </div>
   );
 }

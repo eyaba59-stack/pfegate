@@ -3,7 +3,6 @@
 import { useState, useMemo } from "react";
 import dynamic from "next/dynamic";
 import type { Destination, RegionTraffic } from "@/core/domain/entities/Destination";
-import GroupedBarChart from "./GroupedBarChart";
 
 const DestinationMap = dynamic(() => import("./DestinationMap"), {
   ssr: false,
@@ -28,35 +27,35 @@ export default function DestinationsPageClient({ destinations, allDestinations, 
     [allDestinations]
   );
 
-  const barGroups = useMemo(
-    () =>
-      trafficByRegion.map((r) => ({
-        label: r.region,
-        valueA: r.q1,
-        valueB: r.q2,
-        colorA: "#00668a",
-        colorB: "#40c2fd",
-      })),
-    [trafficByRegion]
-  );
+  const top5 = sortedAll.slice(0, 5);
+  const maxPax = top5[0]?.passengers || 1;
+
+  const maxRegion = useMemo(() => {
+    let max = 1;
+    trafficByRegion.forEach((r) => {
+      if (r.q1 > max) max = r.q1;
+      if (r.q2 > max) max = r.q2;
+    });
+    return max;
+  }, [trafficByRegion]);
+
+  const formatPax = (n: number) => n.toLocaleString("fr-FR");
 
   return (
     <>
       {/* Row 1: Map (8 cols) + Top 5 List (4 cols) */}
       <div className="col-span-12 xl:col-span-8 bg-surface-container-lowest border border-surface-variant rounded-xl shadow-[0px_4px_12px_rgba(15,23,42,0.03)] flex flex-col h-[500px] overflow-hidden group hover:border-secondary transition-colors duration-300">
-        <div className="p-5 border-b border-surface-container flex justify-between items-center bg-surface-container-lowest z-10 relative">
+        <div className="p-widget-padding border-b border-surface-container flex justify-between items-center bg-surface-container-lowest z-10 relative">
           <h3 className="text-headline-sm font-headline-sm text-on-surface">Carte des Lignes (MIR)</h3>
           <div className="flex gap-2">
             <span className="px-2 py-1 bg-surface-container text-on-surface-variant rounded text-label-caps font-label-caps">Temps Réel</span>
           </div>
         </div>
-        <div className="flex-1 relative">
-          <DestinationMap destinations={sortedAll} selected={selected} onSelect={setSelected} />
-        </div>
+        <DestinationMap destinations={sortedAll} selected={selected} onSelect={setSelected} />
       </div>
 
       <div className="col-span-12 xl:col-span-4 bg-surface-container-lowest border border-surface-variant rounded-xl shadow-[0px_4px_12px_rgba(15,23,42,0.03)] flex flex-col h-[500px]">
-        <div className="p-5 border-b border-surface-container flex justify-between items-center">
+        <div className="p-widget-padding border-b border-surface-container flex justify-between items-center">
           <div>
             <h3 className="text-headline-sm font-headline-sm text-on-surface">Top 5 Destinations</h3>
             <p className="text-body-sm font-body-sm text-on-surface-variant mt-1">Volume de passagers (30 derniers jours)</p>
@@ -71,15 +70,14 @@ export default function DestinationsPageClient({ destinations, allDestinations, 
             </button>
           )}
         </div>
-        <div className="p-5 flex-1 flex flex-col gap-4 overflow-y-auto">
-          {sortedAll.slice(0, 5).map((d) => {
+        <div className="p-widget-padding flex-1 flex flex-col gap-4 overflow-y-auto" id="dest-list">
+          {top5.map((d) => {
             const isActive = selected === d.code;
-            const maxPax = sortedAll[0]?.passengers || 1;
             return (
               <div
                 key={d.code}
-                className={`cursor-pointer transition-all duration-300 border-2 rounded-lg p-2 ${
-                  isActive ? "border-secondary bg-secondary/10" : "border-transparent"
+                className={`dest-item cursor-pointer transition-all duration-300 border-2 border-transparent rounded-lg p-2 ${
+                  isActive ? "highlighted" : ""
                 }`}
                 style={{ opacity: selected && !isActive ? 0.4 : 1 }}
                 onClick={() => setSelected(isActive ? null : d.code)}
@@ -95,12 +93,12 @@ export default function DestinationsPageClient({ destinations, allDestinations, 
                     </div>
                   </div>
                   <span className="text-data-mono font-data-mono text-on-surface">
-                    {d.passengers.toLocaleString("fr-FR")} <span className="text-body-sm font-body-sm text-on-surface-variant">pax</span>
+                    {formatPax(d.passengers)} <span className="text-body-sm font-body-sm text-on-surface-variant">pax</span>
                   </span>
                 </div>
                 <div className="w-full bg-surface-container h-2 rounded-full overflow-hidden">
                   <div
-                    className="bg-secondary h-full rounded-full transition-all duration-500"
+                    className={`${getBarColor(d.rank)} h-full rounded-full transition-all duration-500`}
                     style={{ width: `${(d.passengers / maxPax) * 100}%` }}
                   />
                 </div>
@@ -110,16 +108,67 @@ export default function DestinationsPageClient({ destinations, allDestinations, 
         </div>
       </div>
 
-      {/* Row 2: Traffic Evolution Chart */}
-      <div className="col-span-12 bg-surface-container-lowest border border-surface-variant rounded-xl shadow-[0px_4px_12px_rgba(15,23,42,0.03)] p-5">
+      {/* Row 2: Traffic Evolution Chart (12 cols) */}
+      <div className="col-span-12 bg-surface-container-lowest border border-surface-variant rounded-xl shadow-[0px_4px_12px_rgba(15,23,42,0.03)] p-widget-padding">
         <div className="flex justify-between items-center mb-6">
           <div>
             <h3 className="text-headline-sm font-headline-sm text-on-surface">Évolution du Trafic par Région</h3>
             <p className="text-body-sm font-body-sm text-on-surface-variant mt-1">Comparaison trimestrielle des volumes (Vols)</p>
           </div>
+          <div className="flex gap-4">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded bg-secondary" />
+              <span className="text-label-caps font-label-caps text-on-surface-variant">Q1</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded bg-secondary-container" />
+              <span className="text-label-caps font-label-caps text-on-surface-variant">Q2</span>
+            </div>
+          </div>
         </div>
-        <GroupedBarChart groups={barGroups} legendA="Q1" legendB="Q2" height={256} />
+
+        {/* Custom Bar Chart matching HTML mockup */}
+        <div className="h-64 flex items-end justify-between gap-4 border-b border-surface-container pb-2 px-2 relative">
+          {/* Y Axis Labels */}
+          <div className="absolute left-0 top-0 h-full flex flex-col justify-between text-label-caps font-label-caps text-on-surface-variant -ml-8">
+            <span>{formatPax(Math.ceil(maxRegion / 1000) * 1000)}</span>
+            <span>{formatPax(Math.ceil(maxRegion / 2000) * 1000)}</span>
+            <span>0</span>
+          </div>
+          {/* Grid lines */}
+          <div className="absolute left-0 top-0 w-full border-t border-surface-container border-dashed" />
+          <div className="absolute left-0 top-1/2 w-full border-t border-surface-container border-dashed" />
+
+          {trafficByRegion.map((r) => (
+            <div key={r.region} className="flex-1 flex flex-col items-center gap-2 z-10 group cursor-pointer">
+              <div className="flex items-end gap-1 h-48 w-full justify-center">
+                <div
+                  className="w-8 bg-secondary rounded-t-sm group-hover:opacity-90 transition-opacity relative"
+                  style={{ height: `${(r.q1 / maxRegion) * 100}%` }}
+                >
+                  <div className="hidden group-hover:block absolute -top-8 left-1/2 -translate-x-1/2 bg-inverse-surface text-inverse-on-surface text-label-caps px-2 py-1 rounded whitespace-nowrap">
+                    {formatPax(r.q1)}
+                  </div>
+                </div>
+                <div
+                  className="w-8 bg-secondary-container rounded-t-sm group-hover:opacity-90 transition-opacity relative"
+                  style={{ height: `${(r.q2 / maxRegion) * 100}%` }}
+                >
+                  <div className="hidden group-hover:block absolute -top-8 left-1/2 -translate-x-1/2 bg-inverse-surface text-inverse-on-surface text-label-caps px-2 py-1 rounded whitespace-nowrap">
+                    {formatPax(r.q2)}
+                  </div>
+                </div>
+              </div>
+              <span className="text-body-sm font-body-sm text-on-surface font-medium">{r.region}</span>
+            </div>
+          ))}
+        </div>
       </div>
     </>
   );
+}
+
+function getBarColor(rank: number): string {
+  const colors = ["bg-secondary", "bg-secondary-container", "bg-tertiary-fixed-dim", "bg-primary-fixed-dim", "bg-surface-variant"];
+  return colors[(rank - 1) % colors.length] || "bg-secondary";
 }
