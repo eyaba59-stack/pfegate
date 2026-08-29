@@ -57,13 +57,18 @@ function formatPax(n: number): string {
 
 interface LabelOffset { dx: number; dy: number; }
 
-function getLabelOffset(markerX: number, markerY: number, hubX: number, hubY: number): LabelOffset {
-  const angle = Math.atan2(markerY - hubY, markerX - hubX);
-  const deg = (angle * 180) / Math.PI;
-  if (deg >= -45 && deg < 45) return { dx: 30, dy: -20 };
-  if (deg >= 45 && deg < 135) return { dx: -20, dy: 30 };
-  if (deg >= -135 && deg < -45) return { dx: -20, dy: -30 };
-  return { dx: -60, dy: 30 };
+function getLabelOffset(markerX: number, markerY: number, hubX: number, hubY: number, idx: number): LabelOffset {
+  const dx = markerX - hubX;
+  const dy = markerY - hubY;
+  const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+  const normX = dx / dist;
+  const normY = dy / dist;
+  const base = 55;
+  const spread = (idx % 2 === 0) ? 1 : -1;
+  return {
+    dx: Math.round(normX * base + normY * 20 * spread),
+    dy: Math.round(normY * base - normX * 20 * spread),
+  };
 }
 
 export default function DestinationMap({ destinations, selected, onSelect }: DestinationMapProps) {
@@ -161,9 +166,9 @@ export default function DestinationMap({ destinations, selected, onSelect }: Des
         >
           MIR (Monastir)
         </div>
-        {projected.map((d) => {
+        {projected.map((d, i) => {
           const isActive = activeCode === d.code;
-          const off = getLabelOffset(d.x, d.y, hub.x, hub.y);
+          const off = getLabelOffset(d.x, d.y, hub.x, hub.y, i);
           const labelX = d.x + off.dx;
           const labelY = d.y + off.dy;
           return (
