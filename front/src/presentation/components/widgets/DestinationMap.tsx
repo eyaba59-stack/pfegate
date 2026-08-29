@@ -55,6 +55,17 @@ function formatPax(n: number): string {
   return n.toLocaleString("fr-FR");
 }
 
+interface LabelOffset { dx: number; dy: number; }
+
+function getLabelOffset(markerX: number, markerY: number, hubX: number, hubY: number): LabelOffset {
+  const angle = Math.atan2(markerY - hubY, markerX - hubX);
+  const deg = (angle * 180) / Math.PI;
+  if (deg >= -45 && deg < 45) return { dx: 30, dy: -20 };
+  if (deg >= 45 && deg < 135) return { dx: -20, dy: 30 };
+  if (deg >= -135 && deg < -45) return { dx: -20, dy: -30 };
+  return { dx: -60, dy: 30 };
+}
+
 export default function DestinationMap({ destinations, selected, onSelect }: DestinationMapProps) {
   const [hovered, setHovered] = useState<string | null>(null);
   const bounds = useMemo(() => computeBounds(destinations), [destinations]);
@@ -142,7 +153,7 @@ export default function DestinationMap({ destinations, selected, onSelect }: Des
         </g>
       </svg>
 
-      {/* Data Labels (HTML divs matching the HTML mockup) */}
+      {/* Data Labels — each label offset from its marker to avoid overlap */}
       <div className="absolute inset-0 pointer-events-none">
         <div
           className="absolute text-body-sm font-bold text-on-surface bg-surface-container-lowest/90 backdrop-blur-sm px-2 py-1 rounded shadow-sm border border-surface-variant pointer-events-auto"
@@ -152,15 +163,19 @@ export default function DestinationMap({ destinations, selected, onSelect }: Des
         </div>
         {projected.map((d) => {
           const isActive = activeCode === d.code;
+          const off = getLabelOffset(d.x, d.y, hub.x, hub.y);
+          const labelX = d.x + off.dx;
+          const labelY = d.y + off.dy;
           return (
             <div
               key={d.code}
-              className={`map-label absolute bg-primary-container/95 backdrop-blur text-on-primary px-3 py-1.5 rounded-lg shadow-md text-body-sm font-medium border border-outline-variant/30 pointer-events-auto cursor-pointer transition-all duration-300 ${
+              className={`map-label absolute bg-primary-container/95 backdrop-blur text-on-primary px-3 py-1.5 rounded-lg shadow-md text-body-sm font-medium border border-outline-variant/30 pointer-events-auto cursor-pointer transition-all duration-300 whitespace-nowrap ${
                 isActive ? "selected" : ""
               }`}
               style={{
-                top: `${((d.y - 30) / 500) * 100}%`,
-                left: `${((d.x - 40) / 800) * 100}%`,
+                top: `${(labelY / 500) * 100}%`,
+                left: `${(labelX / 800) * 100}%`,
+                transform: "translate(-50%, -50%)",
               }}
               onClick={() => handleClick(d.code)}
               onMouseEnter={() => setHovered(d.code)}
